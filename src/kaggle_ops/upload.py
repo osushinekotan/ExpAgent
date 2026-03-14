@@ -15,7 +15,7 @@ app = SubcommandApp()
 logger = logging.getLogger(__name__)
 
 USERNAME = os.getenv("KAGGLE_USERNAME", "")
-COMP = os.getenv("KAGGLE_COMPETITION_NAME", "")
+COMP = os.getenv("COMPETITION_NAME", "")
 
 
 @app.command()

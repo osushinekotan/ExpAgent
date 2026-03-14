@@ -9,7 +9,7 @@
   "enable_tpu": "false",
   "enable_internet": "false",
   "dataset_sources": [],
-  "competition_sources": ["{KAGGLE_COMPETITION_NAME}"],
+  "competition_sources": ["{COMPETITION_NAME}"],
   "kernel_sources": ["{KAGGLE_USERNAME}/{DEPS_CODE_NAME}"],
   "model_sources": ["{KAGGLE_USERNAME}/{BASE_ARTIFACTS_HANDLE}/{name}/1"]
 }

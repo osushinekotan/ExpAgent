@@ -104,7 +104,7 @@ def _get_common_env() -> tuple[str, str, str]:
     """共通の環境変数（project_id, region, bucket_name）を取得"""
     project_id = os.environ["PROJECT_ID"]
     region = os.environ["REGION"]
-    bucket_name = os.getenv("BUCKET_NAME") or os.environ["KAGGLE_COMPETITION_NAME"]
+    bucket_name = os.getenv("BUCKET_NAME") or os.environ["COMPETITION_NAME"]
     return project_id, region, bucket_name
 
 
@@ -145,7 +145,7 @@ def train(
 
     env_vars: dict[str, str] = {
         "BUCKET_NAME": bucket_name,
-        "KAGGLE_COMPETITION_NAME": os.getenv("KAGGLE_COMPETITION_NAME", ""),
+        "COMPETITION_NAME": os.getenv("COMPETITION_NAME", ""),
     }
     if os.getenv("WANDB_API_KEY"):
         env_vars["WANDB_API_KEY"] = os.environ["WANDB_API_KEY"]
@@ -186,7 +186,7 @@ def download_kaggle_competition_data(
 
     env_vars: dict[str, str] = {
         "BUCKET_NAME": bucket_name,
-        "KAGGLE_COMPETITION_NAME": os.environ["KAGGLE_COMPETITION_NAME"],
+        "COMPETITION_NAME": os.environ["COMPETITION_NAME"],
         "KAGGLE_USERNAME": os.environ["KAGGLE_USERNAME"],
         "KAGGLE_KEY": os.environ["KAGGLE_KEY"],
         "REQUIREMENTS": "kaggle",
@@ -198,7 +198,7 @@ def download_kaggle_competition_data(
         args=[script_gcs_uri],
         environment_variables=env_vars,
     )
-    logger.info("Download completed: gs://%s/data/input/%s/", bucket_name, os.environ["KAGGLE_COMPETITION_NAME"])
+    logger.info("Download completed: gs://%s/data/input/%s/", bucket_name, os.environ["COMPETITION_NAME"])
 
 
 def smoke_test(

@@ -13,7 +13,7 @@ app = SubcommandApp()
 logger = logging.getLogger(__name__)
 
 USERNAME = os.getenv("KAGGLE_USERNAME", "")
-COMP = os.getenv("KAGGLE_COMPETITION_NAME", "")
+COMP = os.getenv("COMPETITION_NAME", "")
 KAGGLE_TITLE_MAX_LENGTH = 50
 
 
@@ -100,7 +100,7 @@ def submission_code(exp: str) -> None:
         f"!pip install {deps_path}/*.whl "
         f"--force-reinstall --root-user-action ignore --no-deps --no-index --find-links {deps_path}"
     )
-    run = f"!KAGGLE_USERNAME={USERNAME} KAGGLE_COMPETITION_NAME={COMP} python {model_dir}/inference.py"
+    run = f"!KAGGLE_USERNAME={USERNAME} COMPETITION_NAME={COMP} python {model_dir}/inference.py"
 
     nb = new_notebook(cells=[new_code_cell(source=install), new_code_cell(source=run)])
     nb["metadata"]["kernelspec"] = {"display_name": "Python 3", "language": "python", "name": "python3"}

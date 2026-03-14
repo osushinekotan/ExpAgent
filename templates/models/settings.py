@@ -43,7 +43,7 @@ class DirectorySettings(BaseModel):
             self.run_env = _get_run_env()
 
         if not self.competition_name:
-            self.competition_name = os.getenv("KAGGLE_COMPETITION_NAME", "")
+            self.competition_name = os.getenv("COMPETITION_NAME", "")
         if not self.kaggle_username:
             self.kaggle_username = os.getenv("KAGGLE_USERNAME", "")
 
@@ -60,7 +60,7 @@ class DirectorySettings(BaseModel):
             )
 
         elif self.run_env == "vertex":
-            bucket = os.getenv("BUCKET_NAME") or os.getenv("KAGGLE_COMPETITION_NAME", "")
+            bucket = os.getenv("BUCKET_NAME") or os.getenv("COMPETITION_NAME", "")
             self.comp_dataset_dir = Path(f"/gcs/{bucket}/data/input/{self.competition_name}")
             self.artifact_dir = Path(f"/gcs/{bucket}/models/{self.exp_name}/artifacts")
             self.output_dir = self.artifact_dir

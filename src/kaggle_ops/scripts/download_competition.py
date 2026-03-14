@@ -5,7 +5,7 @@ import subprocess
 
 from kaggle import KaggleApi
 
-comp_name = os.environ["KAGGLE_COMPETITION_NAME"]
+comp_name = os.environ["COMPETITION_NAME"]
 bucket_name = os.environ["BUCKET_NAME"]
 data_dir = f"/gcs/{bucket_name}/data/input/{comp_name}"
 

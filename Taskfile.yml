@@ -9,7 +9,7 @@ vars:
   GAR_IMAGE: "{{.REGION}}-docker.pkg.dev/{{.PROJECT_ID}}/training-images/training:latest"
   PUSH_DEPS: '{{.PUSH_DEPS | default "true"}}'
   EXTRA_ARGS: '{{.EXTRA_ARGS | default ""}}'
-  BUCKET_NAME: "{{if .BUCKET_NAME}}{{.BUCKET_NAME}}{{else}}{{.KAGGLE_COMPETITION_NAME}}{{end}}"
+  BUCKET_NAME: "{{if .BUCKET_NAME}}{{.BUCKET_NAME}}{{else}}{{.COMPETITION_NAME}}{{end}}"
   ARTIFACT_EXCLUDE: "checkpoint-.*|debug/"
 
 tasks:
@@ -94,7 +94,7 @@ tasks:
   dl-kaggle-comp-gcs:
     desc: Download competition data directly to GCS via Vertex AI job
     requires:
-      vars: [PROJECT_ID, REGION, BUCKET_NAME, KAGGLE_COMPETITION_NAME]
+      vars: [PROJECT_ID, REGION, BUCKET_NAME, COMPETITION_NAME]
     cmds:
       - uv run python -m src.kaggle_ops.vertex download-kaggle-competition-data
 

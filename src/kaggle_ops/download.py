@@ -13,7 +13,7 @@ client.authenticate()
 app = SubcommandApp()
 logger = logging.getLogger(__name__)
 
-COMP = os.getenv("KAGGLE_COMPETITION_NAME", "")
+COMP = os.getenv("COMPETITION_NAME", "")
 INPUT_DIR = "./data/input"
 
 

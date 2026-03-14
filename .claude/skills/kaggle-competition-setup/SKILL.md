@@ -12,7 +12,7 @@ End-to-end setup workflow for a Kaggle competition project: GCP infrastructure p
 Before starting, ensure the following are configured:
 
 - **GCP authentication**: `gcloud auth application-default login` and `gcloud auth login`
-- **`.env` file**: Copy from `.env.example` and fill in required values (`PROJECT_ID`, `REGION`, `KAGGLE_USERNAME`, `KAGGLE_KEY`, `KAGGLE_COMPETITION_NAME`)
+- **`.env` file**: Copy from `.env.example` and fill in required values (`PROJECT_ID`, `REGION`, `KAGGLE_USERNAME`, `KAGGLE_KEY`, `COMPETITION_NAME`)
 - **Tools installed**: `gcloud`, `terraform`, `task` (Taskfile), `uv`
 
 ## Setup Workflow
@@ -48,7 +48,7 @@ task setup-infra
 
 This provisions:
 
-- **GCS bucket** for data and model artifacts (`{KAGGLE_COMPETITION_NAME}`)
+- **GCS bucket** for data and model artifacts (`{COMPETITION_NAME}`)
 - **Artifact Registry** repository for training Docker images (`training-images`)
 - **Service account** for Vertex AI training jobs with IAM roles
 - **Vertex AI API** enablement

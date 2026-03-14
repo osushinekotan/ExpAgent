@@ -13,7 +13,7 @@ Guide the full Kaggle submission pipeline: metadata setup, dependency push, mode
 | ------------------ | -------------------------------------------------------------------- | -------------------------------------------- |
 | 1. Metadata setup  | `task setup-kaggle-metadata EXP=expXXX`                              | Generate kernel-metadata.json and code.ipynb |
 | 2. Full submission | `task submit-kaggle EXP=expXXX`                                      | Push deps + upload model + push kernel       |
-| 3. Result check    | `uv run kaggle competitions submissions -c $KAGGLE_COMPETITION_NAME` | Check public score via API                   |
+| 3. Result check    | `uv run kaggle competitions submissions -c $COMPETITION_NAME` | Check public score via API                   |
 | 4. Record results  | Update README.md front matter                                        | Write public_lb score                        |
 
 ## Submission Scenarios
@@ -90,7 +90,7 @@ Key metadata details:
 ### API Check
 
 ```bash
-uv run kaggle competitions submissions -c $KAGGLE_COMPETITION_NAME
+uv run kaggle competitions submissions -c $COMPETITION_NAME
 ```
 
 Output columns: fileName, date, status, publicScore, privateScore.
