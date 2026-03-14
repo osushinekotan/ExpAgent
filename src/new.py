@@ -1,9 +1,13 @@
+import os
 import shutil
 import subprocess
 from pathlib import Path
+from typing import Literal
 
+import dotenv
 from tyro.extras import SubcommandApp
 
+dotenv.load_dotenv()
 app = SubcommandApp()
 
 
@@ -49,14 +53,27 @@ def _create_backlog_task(name: str, source: str) -> None:
         print(f"Warning: Failed to create backlog task: {result.stderr.strip()}")
 
 
+def _resolve_code_sub(kaggle_code_sub: Literal["auto", "true", "false"]) -> bool:
+    """kaggle_code_sub の値を解決する。auto の場合は環境変数から判定。"""
+    if kaggle_code_sub == "true":
+        return True
+    if kaggle_code_sub == "false":
+        return False
+    # auto: IS_CODE_COMPETITION=true かつ COMPETITION_PLATFORM=kaggle の場合に有効
+    platform = os.getenv("COMPETITION_PLATFORM", "").lower()
+    is_code = os.getenv("IS_CODE_COMPETITION", "false").lower() == "true"
+    return platform == "kaggle" and is_code
+
+
 @app.command()
-def exp(name: str, source: str = "template", kaggle_code_sub: bool = False) -> None:
+def exp(name: str, source: str = "template", kaggle_code_sub: Literal["auto", "true", "false"] = "auto") -> None:
     src = Path("templates/models") if source == "template" else Path(f"models/{source}")
     target = Path(f"models/{name}")
     assert src.exists(), f"Source not found: {src}"
     assert not target.exists(), f"Already exists: {target}"
 
-    ignore = None if kaggle_code_sub else shutil.ignore_patterns("submission")
+    include_submission = _resolve_code_sub(kaggle_code_sub)
+    ignore = None if include_submission else shutil.ignore_patterns("submission")
     shutil.copytree(src, target, ignore=ignore)
     _post_process(target, name, source)
     print(f"Created: {target} (from {src})")
