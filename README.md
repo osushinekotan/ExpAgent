@@ -42,4 +42,5 @@ Install third-party Claude Code skills:
 
 ```bash
 npx skills add wandb/skills --agent claude-code --skill '*' --yes
+npx skills add microsoft/playwright-cli --agent claude-code --skill playwright-cli --yes
 ```
