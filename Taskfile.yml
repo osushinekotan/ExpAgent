@@ -1,0 +1,211 @@
+version: "3"
+
+dotenv: [".env"]
+
+vars:
+  EXP: '{{.EXP | default "exp001"}}'
+  MACHINE_TYPE: '{{.MACHINE_TYPE | default ""}}'
+  CONTAINER_URI: '{{.CONTAINER_URI | default ""}}'
+  GAR_IMAGE: "{{.REGION}}-docker.pkg.dev/{{.PROJECT_ID}}/training-images/training:latest"
+  PUSH_DEPS: '{{.PUSH_DEPS | default "true"}}'
+  EXTRA_ARGS: '{{.EXTRA_ARGS | default ""}}'
+  BUCKET_NAME: "{{if .BUCKET_NAME}}{{.BUCKET_NAME}}{{else}}{{.KAGGLE_COMPETITION_NAME}}{{end}}"
+  ARTIFACT_EXCLUDE: "checkpoint-.*|debug/"
+
+tasks:
+  # Infrastructure
+  auth:
+    desc: Authenticate with GCP
+    cmds:
+      - gcloud auth application-default login
+      - gcloud auth login
+
+  init-infra:
+    desc: Initialize Terraform infrastructure
+    requires:
+      vars: [PROJECT_ID, REGION]
+    cmds:
+      - |
+        if [ ! -f .env ]; then cp .env.example .env; echo ".env created, edit it first"; exit 1; fi
+      - |
+        BUCKET_NAME={{.PROJECT_ID}}-terraform-state
+        gcloud storage buckets create gs://$BUCKET_NAME --project={{.PROJECT_ID}} --location={{.REGION}} --uniform-bucket-level-access 2>/dev/null || true
+        gcloud storage buckets update gs://$BUCKET_NAME --versioning
+      - |
+        cd terraform/environments/dev
+        export GOOGLE_OAUTH_ACCESS_TOKEN=$(gcloud auth application-default print-access-token)
+        terraform init -backend-config="bucket={{.PROJECT_ID}}-terraform-state"
+
+  setup-infra:
+    desc: Apply Terraform infrastructure and build training image
+    env:
+      TF_VAR_project_id: "{{.PROJECT_ID}}"
+      TF_VAR_region: "{{.REGION}}"
+      TF_VAR_bucket_name: "{{.BUCKET_NAME}}"
+    cmds:
+      - cd terraform/environments/dev && terraform apply -auto-approve
+      - task: build-image
+
+  tf-plan:
+    desc: Show Terraform plan
+    env:
+      TF_VAR_project_id: "{{.PROJECT_ID}}"
+      TF_VAR_region: "{{.REGION}}"
+      TF_VAR_bucket_name: "{{.BUCKET_NAME}}"
+    cmds:
+      - cd terraform/environments/dev && terraform plan
+
+  tf-destroy:
+    desc: Destroy Terraform infrastructure
+    env:
+      TF_VAR_project_id: "{{.PROJECT_ID}}"
+      TF_VAR_region: "{{.REGION}}"
+      TF_VAR_bucket_name: "{{.BUCKET_NAME}}"
+    cmds:
+      - cd terraform/environments/dev && terraform destroy
+
+  # Experiment
+  new-exp:
+    desc: Create a new experiment (set KAGGLE_METADATA=false to skip metadata setup)
+    vars:
+      SOURCE: '{{.SOURCE | default "template"}}'
+      KAGGLE_METADATA: '{{.KAGGLE_METADATA | default "true"}}'
+    cmds:
+      - uv run python -m src.kaggle_ops.new exp --name {{.EXP}} --source {{.SOURCE}}
+      - '{{if eq .KAGGLE_METADATA "true"}}task setup-kaggle-metadata EXP={{.EXP}}{{end}}'
+
+  setup-kaggle-metadata:
+    desc: Setup experiment metadata and code
+    cmds:
+      - uv run python -m src.kaggle_ops.write deps-metadata
+      - uv run python -m src.kaggle_ops.write deps-code
+      - uv run python -m src.kaggle_ops.write submission-code --exp {{.EXP}}
+      - uv run python -m src.kaggle_ops.write submission-metadata --exp {{.EXP}} --model-source-names {{.EXP}}
+
+  # Data
+  # NOTE: gcloud storage の sliced download では .gstmp 一時ファイルが残るバグがあるため、
+  # グローバル設定で無効化が必要: gcloud config set storage/sliced_object_download_threshold 0
+  dl-kaggle-comp:
+    desc: Download competition dataset
+    cmds:
+      - uv run python -m src.kaggle_ops.download competition-dataset
+
+  dl-kaggle-comp-gcs:
+    desc: Download competition data directly to GCS via Vertex AI job
+    requires:
+      vars: [PROJECT_ID, REGION, BUCKET_NAME, KAGGLE_COMPETITION_NAME]
+    cmds:
+      - uv run python -m src.kaggle_ops.vertex download-kaggle-competition-data
+
+  pull-data:
+    desc: Pull data from GCS
+    requires:
+      vars: [BUCKET_NAME]
+    cmds:
+      - gcloud storage rsync -r --no-clobber gs://{{.BUCKET_NAME}}/data ./data
+
+  push-data:
+    desc: Push data to GCS
+    requires:
+      vars: [BUCKET_NAME]
+    cmds:
+      - gcloud storage rsync -r --no-clobber ./data gs://{{.BUCKET_NAME}}/data
+
+  pull-artifacts:
+    desc: Pull model artifacts from GCS for specific experiments
+    requires:
+      vars: [BUCKET_NAME]
+    vars:
+      EXPS: '{{.EXPS | default "exp001"}}'
+    cmds:
+      - for: { var: EXPS, split: "," }
+        cmd: gcloud storage rsync -r --delete-unmatched-destination-objects --exclude="{{.ARTIFACT_EXCLUDE}}" gs://{{.BUCKET_NAME}}/models/{{.ITEM}}/artifacts ./models/{{.ITEM}}/artifacts
+
+  push-artifacts:
+    desc: Push model artifacts to GCS for specific experiments
+    requires:
+      vars: [BUCKET_NAME]
+    vars:
+      EXPS: '{{.EXPS | default "exp001"}}'
+    cmds:
+      - for: { var: EXPS, split: "," }
+        cmd: gcloud storage rsync -r ./models/{{.ITEM}}/artifacts gs://{{.BUCKET_NAME}}/models/{{.ITEM}}/artifacts
+
+  # Docker
+  build-image:
+    desc: Build and push training image to GAR
+    requires:
+      vars: [PROJECT_ID, REGION]
+    cmds:
+      - >
+        gcloud builds submit docker
+        --config docker/cloudbuild.yaml
+        --project {{.PROJECT_ID}}
+        --substitutions _REGION={{.REGION}}
+
+  # Training
+  train-local:
+    desc: Run training locally
+    cmds:
+      - uv run python models/{{.EXP}}/train.py {{.EXTRA_ARGS}}
+
+  train-vertex:
+    desc: |
+      Run training on Vertex AI.
+      GPU usage (machine_type is auto-resolved from accelerator_type):
+        task train-vertex ACCELERATOR_TYPE=NVIDIA_L4
+        task train-vertex ACCELERATOR_TYPE=NVIDIA_TESLA_V100
+        task train-vertex ACCELERATOR_TYPE=NVIDIA_TESLA_A100
+    requires:
+      vars: [PROJECT_ID, REGION, BUCKET_NAME]
+    vars:
+      ACCELERATOR_TYPE: '{{.ACCELERATOR_TYPE | default ""}}'
+      ACCELERATOR_COUNT: '{{.ACCELERATOR_COUNT | default "1"}}'
+    cmds:
+      - >
+        uv run python -m src.kaggle_ops.vertex train
+        --exp {{.EXP}}
+        {{if .MACHINE_TYPE}}--machine-type {{.MACHINE_TYPE}}{{end}}
+        {{if .CONTAINER_URI}}--container-uri {{.CONTAINER_URI}}{{end}}
+        {{if .ACCELERATOR_TYPE}}--accelerator-type {{.ACCELERATOR_TYPE}} --accelerator-count {{.ACCELERATOR_COUNT}}{{end}}
+        {{if .EXTRA_ARGS}}--extra-args {{.EXTRA_ARGS}}{{end}}
+      - task: pull-artifacts
+        vars:
+          EXPS: "{{.EXP}}"
+
+  # Kaggle Push
+  push-kaggle-deps:
+    desc: Push dependencies to Kaggle
+    cmds:
+      - uv run python -m src.kaggle_ops.write deps-code
+      - cd deps && uv run kaggle k push
+
+  push-kaggle-models:
+    desc: Upload model to Kaggle
+    cmds:
+      - uv run python -m src.kaggle_ops.upload models --exp {{.EXP}}
+
+  push-kaggle-sub:
+    desc: Push submission to Kaggle
+    cmds:
+      - cd models/{{.EXP}}/submission && uv run kaggle k push
+
+  submit-kaggle:
+    desc: Full Kaggle submission pipeline
+    cmds:
+      - '{{if eq .PUSH_DEPS "true"}}task push-kaggle-deps EXP={{.EXP}}{{end}}'
+      - task: push-kaggle-models
+      - sleep 60
+      - task: push-kaggle-sub
+
+  # Code Quality
+  fmt:
+    desc: Format code
+    cmds:
+      - uv run ruff check --fix .
+      - uv run ruff format .
+
+  ty:
+    desc: Type check
+    cmds:
+      - uv run ty check
