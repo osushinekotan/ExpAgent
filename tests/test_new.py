@@ -1,11 +1,11 @@
-"""src.kaggle_ops.new のテスト。"""
+"""src.new のテスト。"""
 
 import shutil
 from pathlib import Path
 
 import pytest
 
-from src.kaggle_ops.new import _post_process, exp
+from src.new import _post_process, exp
 
 
 @pytest.fixture
