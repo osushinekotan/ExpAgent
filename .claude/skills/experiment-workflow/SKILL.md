@@ -208,6 +208,8 @@ backlog task edit TASK-N --final-summary "CV=0.8765, LB=0.8750. Next: try featur
 backlog task edit TASK-N -s "Done"
 ```
 
-## Directory Settings
+## References
 
-For details on `DirectorySettings`, path resolution across environments (local / Vertex AI / Kaggle), and usage conventions, read `.claude/skills/experiment-workflow/references/directory-settings.md`.
+- **Directory Settings**: For details on `DirectorySettings` and path resolution across environments, read `.claude/skills/experiment-workflow/references/directory-settings.md`.
+- **Backlog**: For backlog CLI usage (task management, documents, decisions), refer to the `backlog` skill.
+- **W&B**: For experiment tracking, metrics logging, and run comparison, refer to the `wandb-primary` skill.
