@@ -61,9 +61,12 @@ backlog task create "expXXX: Short description of experiment" \
 ## Phase 2: Create
 
 ```bash
-task new-exp EXP=exp002                    # From template
-task new-exp EXP=exp002 SOURCE=exp001      # Copy from existing experiment
+task new-exp EXP=exp002                              # From template (without submission dir)
+task new-exp EXP=exp002 KAGGLE_CODE_SUB=true          # From template (with submission dir)
+task new-exp EXP=exp002 SOURCE=exp001                 # Copy from existing experiment
 ```
+
+Set `KAGGLE_CODE_SUB=true` to include the `submission/` directory for Kaggle kernel submission. By default, the submission directory is excluded.
 
 This creates `models/exp002/` with train.py, settings.py, and inference.py. A backlog task is automatically created with labels `exp` and `exp002`.
 

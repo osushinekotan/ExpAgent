@@ -70,8 +70,9 @@ tasks:
     vars:
       SOURCE: '{{.SOURCE | default "template"}}'
       KAGGLE_METADATA: '{{.KAGGLE_METADATA | default "true"}}'
+      KAGGLE_CODE_SUB: '{{.KAGGLE_CODE_SUB | default "false"}}'
     cmds:
-      - uv run python -m src.new exp --name {{.EXP}} --source {{.SOURCE}}
+      - uv run python -m src.new exp --name {{.EXP}} --source {{.SOURCE}} {{if eq .KAGGLE_CODE_SUB "true"}}--kaggle-code-sub{{end}}
       - '{{if eq .KAGGLE_METADATA "true"}}task setup-kaggle-metadata EXP={{.EXP}}{{end}}'
 
   setup-kaggle-metadata:

@@ -50,12 +50,14 @@ def _create_backlog_task(name: str, source: str) -> None:
 
 
 @app.command()
-def exp(name: str, source: str = "template") -> None:
+def exp(name: str, source: str = "template", kaggle_code_sub: bool = False) -> None:
     src = Path("templates/models") if source == "template" else Path(f"models/{source}")
     target = Path(f"models/{name}")
     assert src.exists(), f"Source not found: {src}"
     assert not target.exists(), f"Already exists: {target}"
-    shutil.copytree(src, target)
+
+    ignore = None if kaggle_code_sub else shutil.ignore_patterns("submission")
+    shutil.copytree(src, target, ignore=ignore)
     _post_process(target, name, source)
     print(f"Created: {target} (from {src})")
     _create_backlog_task(name, source)

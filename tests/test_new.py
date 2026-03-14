@@ -69,9 +69,20 @@ class TestExp:
         target = models_dir / "exp001"
         assert target.exists()
         assert (target / "train.py").exists()
+        assert not (target / "submission").exists()
 
         train = (target / "train.py").read_text()
         assert 'exp_name="exp001"' in train
+
+    def test_create_with_kaggle_code_sub(self, template_dir: Path, models_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        """kaggle_code_sub=True の場合、submission ディレクトリが含まれる。"""
+        monkeypatch.chdir(template_dir.parent.parent)
+
+        exp("exp001", source="template", kaggle_code_sub=True)
+
+        target = models_dir / "exp001"
+        assert target.exists()
+        assert (target / "submission").exists()
 
     def test_create_from_existing(self, template_dir: Path, models_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """既存実験からコピーして作成できる。"""
