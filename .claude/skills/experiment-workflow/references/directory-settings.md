@@ -4,19 +4,19 @@
 
 ## Key Directories
 
-| Directory | Description |
-|-----------|-------------|
-| `comp_dataset_dir` | Competition dataset (read-only input) |
-| `artifact_dir` | Trained model artifacts (models, OOF predictions, etc.) |
-| `output_dir` | Output files (submissions, logs) |
+| Directory          | Description                                             |
+| ------------------ | ------------------------------------------------------- |
+| `comp_dataset_dir` | Competition dataset (read-only input)                   |
+| `artifact_dir`     | Trained model artifacts (models, OOF predictions, etc.) |
+| `output_dir`       | Output files (submissions, logs)                        |
 
 ## Environment-Specific Paths
 
-| Environment | comp_dataset_dir | artifact_dir | output_dir |
-|-------------|------------------|--------------|-----------|
-| **local** | `./data/input/{competition}` | `./models/{exp}/artifacts` | Same as artifact_dir |
-| **vertex** | `/gcs/{bucket}/data/input/{competition}` | `/gcs/{bucket}/models/{exp}/artifacts` | Same as artifact_dir |
-| **kaggle** | `/kaggle/input/competitions/{competition}` | `/kaggle/input/models/{username}/{comp}-models/other/{exp}/1/artifacts` | `/kaggle/working` |
+| Environment | comp_dataset_dir                           | artifact_dir                                                            | output_dir           |
+| ----------- | ------------------------------------------ | ----------------------------------------------------------------------- | -------------------- |
+| **local**   | `./data/input/{competition}`               | `./models/{exp}/artifacts`                                              | Same as artifact_dir |
+| **vertex**  | `/gcs/{bucket}/data/input/{competition}`   | `/gcs/{bucket}/models/{exp}/artifacts`                                  | Same as artifact_dir |
+| **kaggle**  | `/kaggle/input/competitions/{competition}` | `/kaggle/input/models/{username}/{comp}-models/other/{exp}/1/artifacts` | `/kaggle/working`    |
 
 Auto-detection uses environment variables: `KAGGLE_DATA_PROXY_TOKEN` (Kaggle), `BUCKET_NAME` (Vertex AI), `.env` variables (local).
 
