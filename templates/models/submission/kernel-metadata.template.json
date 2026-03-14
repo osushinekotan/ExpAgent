@@ -1,0 +1,15 @@
+{
+  "id": "{KAGGLE_USERNAME}/{SUBMISSION_CODE_NAME}",
+  "title": "{SUBMISSION_CODE_NAME}",
+  "code_file": "code.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": "true",
+  "enable_gpu": "false",
+  "enable_tpu": "false",
+  "enable_internet": "false",
+  "dataset_sources": [],
+  "competition_sources": ["{KAGGLE_COMPETITION_NAME}"],
+  "kernel_sources": ["{KAGGLE_USERNAME}/{DEPS_CODE_NAME}"],
+  "model_sources": ["{KAGGLE_USERNAME}/{BASE_ARTIFACTS_HANDLE}/{name}/1"]
+}
