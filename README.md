@@ -35,3 +35,11 @@ models/
 - [Backlog](https://github.com/MrLesk/Backlog.md) — Project management CLI
 - [Playwright CLI](https://github.com/microsoft/playwright-cli) — Browser automation
 - [gcloud CLI](https://cloud.google.com/sdk/docs/install) — Google Cloud SDK
+
+## Setup
+
+Install third-party Claude Code skills:
+
+```bash
+npx skills add wandb/skills --agent claude-code --skill '*' --yes
+```

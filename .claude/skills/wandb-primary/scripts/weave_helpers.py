@@ -24,13 +24,15 @@ Usage (in sandbox):
 
 from __future__ import annotations
 
+import json
 from collections import defaultdict
+from datetime import datetime
 from typing import Any
+
 
 # ---------------------------------------------------------------------------
 # Recursive unwrap — convert Weave types to plain Python
 # ---------------------------------------------------------------------------
-
 
 def unwrap(obj: Any) -> Any:
     """Recursively convert Weave wrapper types to plain Python dicts/lists.
@@ -58,7 +60,11 @@ def unwrap(obj: Any) -> Any:
         try:
             record = object.__getattribute__(obj, "_val")
             if hasattr(record, "__dict__"):
-                return {k: unwrap(v) for k, v in vars(record).items() if not k.startswith("_")}
+                return {
+                    k: unwrap(v)
+                    for k, v in vars(record).items()
+                    if not k.startswith("_")
+                }
         except Exception:
             pass
 
@@ -81,7 +87,6 @@ def unwrap(obj: Any) -> Any:
 # Token usage extraction
 # ---------------------------------------------------------------------------
 
-
 def get_token_usage(call: Any) -> dict[str, int]:
     """Extract total token usage from a Weave call's summary.
 
@@ -99,7 +104,7 @@ def get_token_usage(call: Any) -> dict[str, int]:
 
     total_input = 0
     total_output = 0
-    for _model, u in usage.items() if hasattr(usage, "items") else []:
+    for _model, u in (usage.items() if hasattr(usage, "items") else []):
         total_input += u.get("input_tokens") or u.get("prompt_tokens") or 0
         total_output += u.get("output_tokens") or u.get("completion_tokens") or 0
     return {
@@ -112,7 +117,6 @@ def get_token_usage(call: Any) -> dict[str, int]:
 # ---------------------------------------------------------------------------
 # Eval result extraction
 # ---------------------------------------------------------------------------
-
 
 def eval_results_to_dicts(
     pas_calls: list[Any],
@@ -156,7 +160,11 @@ def eval_results_to_dicts(
                     rubric_passed = getattr(rubric, "passed", None)
                     meta = getattr(rubric, "metadata", None)
                     if meta:
-                        rubric_score = meta.get("score") if hasattr(meta, "get") else getattr(meta, "score", None)
+                        rubric_score = (
+                            meta.get("score")
+                            if hasattr(meta, "get")
+                            else getattr(meta, "score", None)
+                        )
 
             # Model output (nested: output.output)
             model_out = out.get("output") if hasattr(out, "get") else None
@@ -173,19 +181,17 @@ def eval_results_to_dicts(
         if c.started_at and c.ended_at:
             duration = (c.ended_at - c.started_at).total_seconds()
 
-        results.append(
-            {
-                "task": task_name,
-                "agent": agent_name,
-                "score": rubric_score,
-                "passed": rubric_passed,
-                "succeeded": succeeded,
-                "error": str(error)[:100] if error else None,
-                "tool_calls": tool_calls_count,
-                "traj_len": traj_len,
-                "duration_s": round(duration, 1) if duration else None,
-            }
-        )
+        results.append({
+            "task": task_name,
+            "agent": agent_name,
+            "score": rubric_score,
+            "passed": rubric_passed,
+            "succeeded": succeeded,
+            "error": str(error)[:100] if error else None,
+            "tool_calls": tool_calls_count,
+            "traj_len": traj_len,
+            "duration_s": round(duration, 1) if duration else None,
+        })
 
     results.sort(key=lambda r: r.get("task", ""))
     return results
@@ -194,7 +200,6 @@ def eval_results_to_dicts(
 # ---------------------------------------------------------------------------
 # Pivot table — solve rate per task across agents
 # ---------------------------------------------------------------------------
-
 
 def pivot_solve_rate(all_results: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Build a pivot table: one row per task, aggregated across all agents.
@@ -222,32 +227,29 @@ def pivot_solve_rate(all_results: list[dict[str, Any]]) -> list[dict[str, Any]]:
         best = max(entries, key=lambda e: e.get("score") or 0)
         worst = min(entries, key=lambda e: e.get("score") or 0)
 
-        pivot.append(
-            {
-                "task": task,
-                "agents_passed": passed,
-                "agents_attempted": n,
-                "pass_rate": f"{passed / n:.0%}" if n > 0 else "0%",
-                "mean_score": round(mean_score, 3),
-                "best_agent": (
-                    f"{best['agent']} ({best.get('score', 0):.2f})"
-                    if best.get("score", 0) != worst.get("score", 0)
-                    else "—"
-                ),
-                "worst_agent": (
-                    f"{worst['agent']} ({worst.get('score', 0):.2f})"
-                    if best.get("score", 0) != worst.get("score", 0)
-                    else "—"
-                ),
-            }
-        )
+        pivot.append({
+            "task": task,
+            "agents_passed": passed,
+            "agents_attempted": n,
+            "pass_rate": f"{passed / n:.0%}" if n > 0 else "0%",
+            "mean_score": round(mean_score, 3),
+            "best_agent": (
+                f"{best['agent']} ({best.get('score', 0):.2f})"
+                if best.get("score", 0) != worst.get("score", 0)
+                else "—"
+            ),
+            "worst_agent": (
+                f"{worst['agent']} ({worst.get('score', 0):.2f})"
+                if best.get("score", 0) != worst.get("score", 0)
+                else "—"
+            ),
+        })
     return pivot
 
 
 # ---------------------------------------------------------------------------
 # Pretty-print helpers
 # ---------------------------------------------------------------------------
-
 
 def results_summary(results: list[dict[str, Any]]) -> str:
     """Print a compact summary of eval results."""
@@ -259,7 +261,10 @@ def results_summary(results: list[dict[str, Any]]) -> str:
     mean_score = sum(scores) / len(scores) if scores else 0.0
     passed = sum(1 for r in results if r.get("passed"))
     succeeded = sum(1 for r in results if r.get("succeeded"))
-    timed_out = sum(1 for r in results if r.get("error") and "timeout" in str(r["error"]).lower())
+    timed_out = sum(
+        1 for r in results
+        if r.get("error") and "timeout" in str(r["error"]).lower()
+    )
 
     lines = [
         f"Tasks: {n}",
@@ -276,7 +281,6 @@ def results_summary(results: list[dict[str, Any]]) -> str:
 # ---------------------------------------------------------------------------
 # Eval health analysis
 # ---------------------------------------------------------------------------
-
 
 def eval_health(eval_calls: list[Any]) -> list[dict[str, Any]]:
     """Extract health metrics from a list of Evaluation.evaluate calls.
@@ -304,23 +308,21 @@ def eval_health(eval_calls: list[Any]) -> list[dict[str, Any]]:
 
         usage = summary.get("usage", {}) if hasattr(summary, "get") else {}
         total_tokens = 0
-        for _model, u in usage.items() if hasattr(usage, "items") else []:
+        for _model, u in (usage.items() if hasattr(usage, "items") else []):
             total_tokens += u.get("total_tokens", 0)
 
         display = getattr(ec, "display_name", None) or "unnamed"
         started = ec.started_at.strftime("%Y-%m-%d %H:%M") if ec.started_at else ""
 
-        rows.append(
-            {
-                "display_name": display,
-                "started_at": started,
-                "status": status,
-                "success_count": success_count,
-                "error_count": error_count,
-                "total_tokens": total_tokens,
-                "call_id": ec.id,
-            }
-        )
+        rows.append({
+            "display_name": display,
+            "started_at": started,
+            "status": status,
+            "success_count": success_count,
+            "error_count": error_count,
+            "total_tokens": total_tokens,
+            "call_id": ec.id,
+        })
     return rows
 
 
@@ -340,14 +342,12 @@ def eval_efficiency(eval_calls: list[Any]) -> list[dict[str, Any]]:
             continue
         sc = h["success_count"]
         tps = h["total_tokens"] / sc if sc > 0 else float("inf")
-        rows.append(
-            {
-                "display_name": h["display_name"],
-                "total_tokens": h["total_tokens"],
-                "success_count": sc,
-                "error_count": h["error_count"],
-                "tokens_per_success": round(tps),
-            }
-        )
+        rows.append({
+            "display_name": h["display_name"],
+            "total_tokens": h["total_tokens"],
+            "success_count": sc,
+            "error_count": h["error_count"],
+            "tokens_per_success": round(tps),
+        })
     rows.sort(key=lambda r: r["tokens_per_success"])
     return rows

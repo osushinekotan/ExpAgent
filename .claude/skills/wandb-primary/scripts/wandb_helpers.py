@@ -22,10 +22,10 @@ from __future__ import annotations
 
 from typing import Any
 
+
 # ---------------------------------------------------------------------------
 # Runs -> DataFrame
 # ---------------------------------------------------------------------------
-
 
 def runs_to_dataframe(
     runs: Any,
@@ -71,7 +71,6 @@ def runs_to_dataframe(
 # Run diagnostics
 # ---------------------------------------------------------------------------
 
-
 def diagnose_run(run: Any) -> dict[str, Any]:
     """Quick diagnostic summary of a training run.
 
@@ -97,7 +96,9 @@ def diagnose_run(run: Any) -> dict[str, Any]:
         "min_loss": loss.min() if len(loss) else None,
         "min_loss_step": int(loss.idxmin()) if len(loss) else None,
         "has_nan": bool(loss.isna().any()),
-        "final_10pct_mean": float(loss.tail(max(1, len(loss) // 10)).mean()) if len(loss) else None,
+        "final_10pct_mean": float(loss.tail(max(1, len(loss) // 10)).mean())
+        if len(loss)
+        else None,
     }
 
     # Overfitting check (val_loss diverging from train loss)
@@ -122,7 +123,6 @@ def diagnose_run(run: Any) -> dict[str, Any]:
 # Config comparison
 # ---------------------------------------------------------------------------
 
-
 def compare_configs(run_a: Any, run_b: Any) -> list[dict[str, Any]]:
     """Side-by-side config comparison between two W&B runs.
 
@@ -144,11 +144,9 @@ def compare_configs(run_a: Any, run_b: Any) -> list[dict[str, Any]]:
         val_a = config_a.get(k)
         val_b = config_b.get(k)
         if val_a != val_b:
-            diffs.append(
-                {
-                    "key": k,
-                    run_a.name: val_a,
-                    run_b.name: val_b,
-                }
-            )
+            diffs.append({
+                "key": k,
+                run_a.name: val_a,
+                run_b.name: val_b,
+            })
     return diffs

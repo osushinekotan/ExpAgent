@@ -2,7 +2,6 @@
 name: wandb-primary
 description: Comprehensive primary skill for agents working with Weights & Biases. Covers both the W&B SDK (training runs, metrics, artifacts, sweeps, reports) and the Weave SDK (GenAI traces, evaluations, scorers). Includes helper libraries, gotcha tables, and data analysis patterns. Use this skill whenever the user asks about W&B runs, Weave traces, evaluations, training metrics, loss curves, model comparisons, or any Weights & Biases data — even if they don't say "W&B" explicitly.
 ---
-
 <!--
 SPDX-FileCopyrightText: 2026 CoreWeave, Inc.
 SPDX-License-Identifier: Apache-2.0
@@ -24,25 +23,23 @@ Once you know the environment, **write your finding into this skill** by replaci
 
 <!-- AGENT: Replace the content between the ENVIRONMENT markers with the detected environment -->
 <!-- ENVIRONMENT_START -->
-
 **Detected Python environment:** _not yet detected_
 
 ```
 # Run command: <not yet detected>
 # Install command: <not yet detected>
 ```
-
 <!-- ENVIRONMENT_END -->
 
 **Examples of what to write here:**
 
-| Environment | Run command                              | Install command                        |
-| ----------- | ---------------------------------------- | -------------------------------------- |
-| uv          | `uv run script.py`                       | `uv pip install pandas`                |
-| poetry      | `poetry run python script.py`            | `poetry add pandas`                    |
-| conda       | `conda run python script.py`             | `conda install pandas`                 |
-| bare venv   | `python script.py` (with venv activated) | `pip install pandas`                   |
-| docker      | `docker exec <ctr> python script.py`     | `docker exec <ctr> pip install pandas` |
+| Environment | Run command | Install command |
+|---|---|---|
+| uv | `uv run script.py` | `uv pip install pandas` |
+| poetry | `poetry run python script.py` | `poetry add pandas` |
+| conda | `conda run python script.py` | `conda install pandas` |
+| bare venv | `python script.py` (with venv activated) | `pip install pandas` |
+| docker | `docker exec <ctr> python script.py` | `docker exec <ctr> pip install pandas` |
 
 **If you cannot determine the environment, write this:**
 
@@ -61,13 +58,13 @@ This skill covers everything an agent needs to work with Weights & Biases:
 
 ## When to use what
 
-| I need to...                                        | Use                                                                                      |
-| --------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Query training runs, loss curves, hyperparameters   | **W&B SDK** (`wandb.Api()`) — see `references/WANDB_SDK.md`                              |
-| Query GenAI traces, calls, evaluations              | **Weave SDK** (`weave.init()`, `client.get_calls()`) — see `references/WEAVE_SDK.md`     |
-| Convert Weave wrapper types to plain Python         | **`weave_helpers.unwrap()`**                                                             |
-| Build a DataFrame from training runs                | **`wandb_helpers.runs_to_dataframe()`**                                                  |
-| Extract eval results for analysis                   | **`weave_helpers.eval_results_to_dicts()`**                                              |
+| I need to... | Use |
+|---|---|
+| Query training runs, loss curves, hyperparameters | **W&B SDK** (`wandb.Api()`) — see `references/WANDB_SDK.md` |
+| Query GenAI traces, calls, evaluations | **Weave SDK** (`weave.init()`, `client.get_calls()`) — see `references/WEAVE_SDK.md` |
+| Convert Weave wrapper types to plain Python | **`weave_helpers.unwrap()`** |
+| Build a DataFrame from training runs | **`wandb_helpers.runs_to_dataframe()`** |
+| Extract eval results for analysis | **`weave_helpers.eval_results_to_dicts()`** |
 | Need low-level Weave filtering (CallsFilter, Query) | **Raw Weave SDK** (`weave.init()`, `client.get_calls()`) — see `references/WEAVE_SDK.md` |
 
 ---
@@ -288,7 +285,7 @@ See `references/WEAVE_SDK.md` for the full SDK reference.
 
 ## Report authoring (W&B Reports)
 
-- Install the reports extra once. Use the environment-default python package manager to install `wandb[workspaces]` or default to: `uv pip install "wandb[workspaces]"`.
+- Install the reports extra once. Use the environment-default python package manager to install `wandb[workspaces]` or default to:  `uv pip install "wandb[workspaces]"`.
 - Use `wandb.apis.reports` to create a report and save it.
 - `report.save(...)` is mutating; only call it when asked to publish.
 - Report widths: prefer `fixed` (medium). Other options: `readable` (narrow), `fluid` (full).
@@ -327,18 +324,18 @@ report = wr.Report(
 
 ### Weave API
 
-| Gotcha               | Wrong                           | Right                                                  |
-| -------------------- | ------------------------------- | ------------------------------------------------------ |
-| weave.init args      | `weave.init(project="x")`       | `weave.init("x")` (positional)                         |
-| Parent filter        | `filter={'parent_id': 'x'}`     | `filter={'parent_ids': ['x']}` (plural, list)          |
-| WeaveObject access   | `rubric.get('passed')`          | `getattr(rubric, 'passed', None)`                      |
-| Nested output        | `out.get('succeeded')`          | `out.get('output').get('succeeded')` (output.output)   |
-| ObjectRef comparison | `name_ref == "foo"`             | `str(name_ref) == "foo"`                               |
-| CallsFilter import   | `from weave import CallsFilter` | `from weave.trace.weave_client import CallsFilter`     |
-| Query import         | `from weave import Query`       | `from weave.trace_server.interface.query import Query` |
-| Eval status path     | `summary["status"]`             | `summary["weave"]["status"]`                           |
-| Eval success count   | `summary["success_count"]`      | `summary["weave"]["status_counts"]["success"]`         |
-| When in doubt        | Guess the type                  | `unwrap()` first, then inspect                         |
+| Gotcha | Wrong | Right |
+|--------|-------|-------|
+| weave.init args | `weave.init(project="x")` | `weave.init("x")` (positional) |
+| Parent filter | `filter={'parent_id': 'x'}` | `filter={'parent_ids': ['x']}` (plural, list) |
+| WeaveObject access | `rubric.get('passed')` | `getattr(rubric, 'passed', None)` |
+| Nested output | `out.get('succeeded')` | `out.get('output').get('succeeded')` (output.output) |
+| ObjectRef comparison | `name_ref == "foo"` | `str(name_ref) == "foo"` |
+| CallsFilter import | `from weave import CallsFilter` | `from weave.trace.weave_client import CallsFilter` |
+| Query import | `from weave import Query` | `from weave.trace_server.interface.query import Query` |
+| Eval status path | `summary["status"]` | `summary["weave"]["status"]` |
+| Eval success count | `summary["success_count"]` | `summary["weave"]["status_counts"]["success"]` |
+| When in doubt | Guess the type | `unwrap()` first, then inspect |
 
 ### WeaveDict vs WeaveObject
 
@@ -348,22 +345,22 @@ report = wr.Report(
 
 ### W&B API
 
-| Gotcha                 | Wrong                  | Right                                                   |
-| ---------------------- | ---------------------- | ------------------------------------------------------- |
-| Summary access         | `run.summary["loss"]`  | `run.summary_metrics.get("loss")`                       |
-| Loading all runs       | `list(api.runs(...))`  | `runs[:200]` (always slice)                             |
-| History — all fields   | `run.history()`        | `run.history(samples=500, keys=["loss"])`               |
-| scan_history — no keys | `scan_history()`       | `scan_history(keys=["loss"])` (explicit)                |
-| Raw data in context    | `print(run.history())` | Load into DataFrame, compute stats                      |
-| Metric at step N       | iterate entire history | `scan_history(keys=["loss"], min_step=N, max_step=N+1)` |
-| Cache staleness        | reading live run       | `api.flush()` first                                     |
+| Gotcha | Wrong | Right |
+|--------|-------|-------|
+| Summary access | `run.summary["loss"]` | `run.summary_metrics.get("loss")` |
+| Loading all runs | `list(api.runs(...))` | `runs[:200]` (always slice) |
+| History — all fields | `run.history()` | `run.history(samples=500, keys=["loss"])` |
+| scan_history — no keys | `scan_history()` | `scan_history(keys=["loss"])` (explicit) |
+| Raw data in context | `print(run.history())` | Load into DataFrame, compute stats |
+| Metric at step N | iterate entire history | `scan_history(keys=["loss"], min_step=N, max_step=N+1)` |
+| Cache staleness | reading live run | `api.flush()` first |
 
 ### Package management
 
-| Gotcha                         | Details                                                                                             |
-| ------------------------------ | --------------------------------------------------------------------------------------------------- |
-| Using the wrong runner         | Always use the run/install commands from the **Python environment detection** section — never guess |
-| Bare `python` when env unknown | If you haven't detected the environment yet, default to `uv run script.py` (never bare `python`)    |
+| Gotcha | Details |
+|--------|---------|
+| Using the wrong runner | Always use the run/install commands from the **Python environment detection** section — never guess |
+| Bare `python` when env unknown | If you haven't detected the environment yet, default to `uv run script.py` (never bare `python`) |
 
 ### Weave logging noise
 

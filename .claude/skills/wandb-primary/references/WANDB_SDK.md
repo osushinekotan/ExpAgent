@@ -189,14 +189,14 @@ df = pd.DataFrame(rows)
 
 ### When to use which
 
-| Use case                 | Method                              |
-| ------------------------ | ----------------------------------- |
-| Quick plot / overview    | `history(samples=500)`              |
-| Dashboard summary        | `history(samples=1000, keys=[...])` |
-| Anomaly detection        | `scan_history(keys=[...])`          |
-| Exact loss values        | `scan_history(keys=["loss"])`       |
-| System metrics (GPU/CPU) | `history(stream="system")`          |
-| Very long runs           | `scan_history()` (iterator)         |
+| Use case | Method |
+|----------|--------|
+| Quick plot / overview | `history(samples=500)` |
+| Dashboard summary | `history(samples=1000, keys=[...])` |
+| Anomaly detection | `scan_history(keys=[...])` |
+| Exact loss values | `scan_history(keys=["loss"])` |
+| System metrics (GPU/CPU) | `history(stream="system")` |
+| Very long runs | `scan_history()` (iterator) |
 
 ### Bulk history — multiple runs
 
@@ -402,16 +402,16 @@ for p in projects[:20]:
 
 ## Common Gotchas
 
-| Gotcha               | Wrong                  | Right                                                   |
-| -------------------- | ---------------------- | ------------------------------------------------------- |
-| Summary access       | `run.summary["loss"]`  | `run.summary_metrics.get("loss")`                       |
-| Loading all runs     | `list(api.runs(...))`  | `runs[:200]` (always slice)                             |
-| History — all fields | `run.history()`        | `run.history(samples=500, keys=["loss"])`               |
-| History — no keys    | `scan_history()`       | `scan_history(keys=["loss"])` (explicit)                |
-| Raw data in context  | `print(run.history())` | Load into DataFrame, compute stats, print summary       |
-| Comparing configs    | manual key-by-key      | `pd.DataFrame([a.config, b.config]).T`                  |
-| Metric at step N     | iterate history        | `scan_history(keys=["loss"], min_step=N, max_step=N+1)` |
-| Cache staleness      | reading live run       | `api.flush()` first                                     |
+| Gotcha | Wrong | Right |
+|--------|-------|-------|
+| Summary access | `run.summary["loss"]` | `run.summary_metrics.get("loss")` |
+| Loading all runs | `list(api.runs(...))` | `runs[:200]` (always slice) |
+| History — all fields | `run.history()` | `run.history(samples=500, keys=["loss"])` |
+| History — no keys | `scan_history()` | `scan_history(keys=["loss"])` (explicit) |
+| Raw data in context | `print(run.history())` | Load into DataFrame, compute stats, print summary |
+| Comparing configs | manual key-by-key | `pd.DataFrame([a.config, b.config]).T` |
+| Metric at step N | iterate history | `scan_history(keys=["loss"], min_step=N, max_step=N+1)` |
+| Cache staleness | reading live run | `api.flush()` first |
 
 ---
 
