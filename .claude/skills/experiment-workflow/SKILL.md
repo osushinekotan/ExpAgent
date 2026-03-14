@@ -1,0 +1,251 @@
+---
+name: experiment-workflow
+description: This skill should be used when the user asks to "create a new experiment", "start an experiment", "新しい実験", "実験を作って", "run training", "train a model", "record results", "結果を記録", "plan next experiment", "次の実験を考えて", "review experiment history", "実験の履歴を見て", or wants to follow the experiment lifecycle (plan, create, implement, train, record).
+---
+
+# Experiment Workflow
+
+Guide the full experiment lifecycle: plan, create, implement, train, and record results.
+
+## Workflow Overview
+
+| Phase      | Action                                                                     |
+| ---------- | -------------------------------------------------------------------------- |
+| Understand | Review competition docs (`docs/{competition_name}/`)                       |
+| Plan       | Review backlog and past experiments, create experiment task                 |
+| Create     | `task new-exp EXP=expXXX` to create experiment directory with front matter |
+| Implement  | Write train.py, settings.py, run code quality checks, fill README          |
+| Train      | `task train-local` or `task train-vertex`                                  |
+| Record     | Update README metrics, update backlog task with results                    |
+
+## Phase 0: Understand the Competition
+
+Before planning any experiment, review the competition documentation in `docs/`:
+
+1. Read `docs/{competition_name}/overview.md` — competition overview, evaluation metric, rules, timeline
+2. Read `docs/{competition_name}/data.md` — dataset description, column definitions, file formats
+
+Check what's available in `docs/` and review relevant materials before designing experiments.
+
+## Phase 1: Plan
+
+Before starting a new experiment, review the backlog and past experiments:
+
+1. Check backlog for experiment history and project state:
+   ```bash
+   backlog task list -l exp --plain    # List all experiment tasks
+   backlog overview                     # Project-level summary
+   ```
+2. Review past experiment READMEs in `models/` for detailed results
+3. Design the next experiment with a clear hypothesis
+
+### Create Experiment Task in Backlog
+
+Every experiment MUST have a corresponding backlog task. Create it before starting implementation:
+
+```bash
+backlog task create "expXXX: Short description of experiment" \
+  -d "Hypothesis: ... / Changes from base: ... / Expected outcome: ..." \
+  -l exp -l expXXX \
+  --ac "Training completes without errors" \
+  --ac "CV score recorded in README" \
+  --priority medium
+```
+
+**Required conventions:**
+
+- **Label `exp`**: All experiment tasks MUST have the `exp` label for filtering
+- **Label `expXXX`**: All experiment tasks MUST have the experiment name (e.g., `exp001`) as a label
+- **Title prefix**: Start the title with the experiment name (e.g., `exp002: ...`)
+- **Base experiment reference**: If based on a previous experiment, add dependency: `--dep TASK-N` (the parent experiment's task)
+
+## Phase 2: Create
+
+```bash
+task new-exp EXP=exp002                    # From template
+task new-exp EXP=exp002 SOURCE=exp001      # Copy from existing experiment
+```
+
+This creates `models/exp002/` with train.py, settings.py, inference.py, and README.md.
+
+## Phase 3: Implement, Verify, and Document
+
+### Write README Front Matter
+
+Every experiment README (`models/<exp>/README.md`) MUST start with YAML front matter:
+
+```yaml
+---
+name: exp002
+description: |
+  Detailed description of the experiment.
+  Explain the hypothesis, what changes were made from the base experiment,
+  and what you expect to observe.
+model: model_type
+base_experiment: exp001
+metrics: {}
+---
+```
+
+Field definitions:
+
+- **name**: Experiment ID (e.g., `exp001`, `exp002`)
+- **description**: Thorough description (hypothesis, changes, expectations)
+- **model**: Model type or architecture name
+- **base_experiment**: Parent experiment (`null` for the first). Auto-populated by `new-exp`.
+- **metrics**: Empty dict `{}` initially; filled in after training
+
+### Implement train.py
+
+`train.py` must use `tyro.cli` with a `main()` function to support CLI arguments (e.g., `--debug`):
+
+```python
+from settings import Config, DirectorySettings
+
+def predict(model, df, ...):
+    """推論処理。inference.pyからも呼び出される。"""
+    ...
+
+def main(debug: bool = False) -> None:
+    settings = DirectorySettings(exp_name="expXXX")
+    config = Config()
+
+    if debug:
+        settings.artifact_dir = settings.artifact_dir / "debug"
+        settings.output_dir = settings.artifact_dir
+        config.epochs = 1
+
+    # ... data loading, training, model save ...
+
+    # バリデーション推論
+    val_predictions = predict(model, val_df)
+    # 評価メトリクスを計算し、OOF予測をCSVに保存
+
+if __name__ == "__main__":
+    import tyro
+    tyro.cli(main)
+```
+
+Key conventions:
+
+- **Experiment tracking uses [W&B (Weights & Biases)](https://wandb.ai/)**. Initialize and configure wandb in `train.py` only — do not use wandb in `settings.py` or `inference.py`. Disable wandb in debug mode (`wandb.init(mode="disabled")` or equivalent).
+- All training logic goes inside `main()`, invoked via `tyro.cli(main)`
+- `if __name__ == "__main__"` guard is required (enables safe import by inference.py)
+- `predict()` is defined in train.py; inference.py imports it via `from train import predict`
+- `debug: bool = False` is the standard flag; add other CLI args as needed
+- After training, run validation inference using `predict()` (same pipeline as submission) and compute evaluation metrics
+- Save OOF predictions CSV to `artifact_dir`
+- **All hyperparameters and tunable constants must be defined in `Config`** (in `settings.py`). Do not use module-level constants for tunable values. This centralizes experiment configuration and makes it easy to compare settings across experiments.
+
+### Implement inference.py (Submission Pipeline)
+
+`inference.py` is the submission pipeline that runs on internet-off environment. It must be self-contained and produce the final submission.
+
+**Requirements:**
+
+- **Import `predict()` from train.py**: `from train import predict` — inference logic is defined in train.py and shared
+- **`main()` + `if __name__ == "__main__"` guard**: Wrap execution in `main()` with a guard to allow safe imports
+- **End-to-end**: Covers the full pipeline from data loading to submission output:
+  1. **Data loading** — read test data from `input_dir`
+  2. **Preprocessing** — apply the same transforms used during training
+  3. **Model loading** — load trained model artifacts from `artifacts_dir`
+  4. **Inference** — run predictions on test data
+  5. **Postprocessing** — apply any necessary output transforms
+  6. **Submission output** — save the final result according to the competition format (e.g., `submission.csv` to `output_dir`, or use the evaluation API if required)
+
+**Submission format**: Follow the competition's specification exactly. Check `docs/{competition_name}/overview.md` and `data.md` for the expected output format, column names, and file naming conventions.
+
+### Code Quality Checks
+
+After writing code, always run:
+
+1. **Code simplifier**: Run `/simplify` to review and simplify
+2. **Format**: `task fmt` (ruff check --fix + ruff format)
+3. **Type check**: `task ty` (ty check)
+
+### Commit
+
+After implementation and code quality checks pass, commit the changes using the `/commit-commands:commit` skill.
+
+### README Body
+
+Write these sections in the README body:
+
+- **Overview**: Brief summary of what this experiment does and its key idea
+- **Details**: In-depth explanation — feature engineering, model architecture, hyperparameter choices, preprocessing steps
+- **Usage**: How to run (`task train-local EXP=expXXX`, `task train-vertex EXP=expXXX`)
+- **Results**: Left empty until training completes
+
+## Phase 4: Train
+
+**Always run training commands in the background** using `run_in_background: true` on the Bash tool. Training can take minutes to hours, and blocking the conversation prevents the user from doing other work. After launching, inform the user that training is running and they can check progress with `TaskOutput`.
+
+Before starting training, use `AskUserQuestion` to ask the user how they want to run training. Present the available options:
+
+- **Vertex AI with L4 GPU (Recommended)** — `task train-vertex EXP=expXXX ACCELERATOR_TYPE=NVIDIA_L4`
+- **Vertex AI with V100 GPU** — `task train-vertex EXP=expXXX ACCELERATOR_TYPE=NVIDIA_TESLA_V100`
+- **Vertex AI (CPU only)** — `task train-vertex EXP=expXXX`
+- **Local** — `task train-local EXP=expXXX`
+- **Debug run (動作確認)** — `task train-local EXP=expXXX EXTRA_ARGS="--debug"` or `task train-vertex EXP=expXXX EXTRA_ARGS="--debug"`
+- **Skip** — skip training for now (e.g., user will run it manually later)
+
+GPU-requiring tasks should default to **NVIDIA_L4**. Machine type is auto-resolved from accelerator type by `GpuConfig` in `src/kaggle_ops/vertex.py`.
+
+### Vertex AI GPU options
+
+| Accelerator         | Default Machine Type | Command                                                           |
+| ------------------- | -------------------- | ----------------------------------------------------------------- |
+| NVIDIA_L4 (default) | `g2-standard-8`      | `task train-vertex EXP=expXXX ACCELERATOR_TYPE=NVIDIA_L4`         |
+| NVIDIA_TESLA_V100   | `n1-highmem-8`       | `task train-vertex EXP=expXXX ACCELERATOR_TYPE=NVIDIA_TESLA_V100` |
+| NVIDIA_TESLA_A100   | `a2-highgpu-1g`      | `task train-vertex EXP=expXXX ACCELERATOR_TYPE=NVIDIA_TESLA_A100` |
+| CPU only            | `n1-highmem-8`       | `task train-vertex EXP=expXXX`                                    |
+
+```bash
+task train-local EXP=exp002                                        # Run training locally
+task train-vertex EXP=exp002 ACCELERATOR_TYPE=NVIDIA_L4             # Vertex AI with L4 (auto machine type)
+task train-local EXP=exp002 EXTRA_ARGS="--debug"                   # Debug run locally (epochs=1, data limited)
+task train-vertex EXP=exp002 EXTRA_ARGS="--debug"                  # Debug run on Vertex AI
+```
+
+### Debug mode
+
+Use `EXTRA_ARGS="--debug"` to run in debug mode. This is useful for verifying end-to-end pipeline correctness before launching a full training run.
+
+Debug mode applies these overrides in `train.py`:
+
+- **Config overrides**: epochs=1, reduced max_length, etc.
+- **Data limiting**: training data truncated to a small subset
+- **artifact_dir isolation**: saves to `artifacts/debug/` to avoid mixing with production artifacts
+- **wandb disabled**: no logging to wandb during debug runs
+
+`EXTRA_ARGS` is a generic parameter that passes arbitrary arguments to `train.py`. On Vertex AI, arguments are forwarded via `vertex.py`'s `extra_args` through the container entrypoint.
+
+## Phase 5: Record Results
+
+After training completes, update both the README and the backlog task:
+
+### 1. Update README
+
+1. Fill in `metrics` in the front matter with actual values:
+   ```yaml
+   metrics:
+     cv_score: 0.8765
+     public_lb: 0.8750
+     private_lb: null
+   ```
+2. Write the **Results** section with analysis, per-fold scores, observations, and next steps.
+
+### 2. Update Backlog Task
+
+Record results and close the experiment task:
+
+```bash
+backlog task edit TASK-N --append-notes "CV score: 0.8765, Public LB: 0.8750"
+backlog task edit TASK-N --check-ac 1 --check-ac 2
+backlog task edit TASK-N --final-summary "CV=0.8765, LB=0.8750. Next: try feature X (see TASK-M)"
+backlog task edit TASK-N -s "Done"
+```
+
+## Directory Settings
+
+For details on `DirectorySettings`, path resolution across environments (local / Vertex AI / Kaggle), and usage conventions, read `.claude/skills/experiment-workflow/references/directory-settings.md`.
