@@ -9,23 +9,25 @@ Guide the full experiment lifecycle: plan, create, implement, train, and record 
 
 ## Workflow Overview
 
-| Phase      | Action                                                                     |
-| ---------- | -------------------------------------------------------------------------- |
-| Understand | Review competition docs (`docs/{competition_name}/`)                       |
-| Plan       | Review backlog and past experiments, create experiment task                 |
-| Create     | `task new-exp EXP=expXXX` to create experiment directory and backlog task  |
-| Implement  | Write train.py, settings.py, run code quality checks                       |
-| Train      | `task train-local` or `task train-vertex`                                  |
-| Record     | Update README metrics, update backlog task with results                    |
+| Phase      | Action                                                                    |
+| ---------- | ------------------------------------------------------------------------- |
+| Understand | Review competition docs in backlog (`backlog doc list`)                   |
+| Plan       | Review backlog and past experiments, create experiment task               |
+| Create     | `task new-exp EXP=expXXX` to create experiment directory and backlog task |
+| Implement  | Write train.py, settings.py, run code quality checks                      |
+| Train      | `task train-local` or `task train-vertex`                                 |
+| Record     | Update backlog task with results                                          |
 
 ## Phase 0: Understand the Competition
 
-Before planning any experiment, review the competition documentation in `docs/`:
+Before planning any experiment, review the competition documentation stored in backlog:
 
-1. Read `docs/{competition_name}/overview.md` — competition overview, evaluation metric, rules, timeline
-2. Read `docs/{competition_name}/data.md` — dataset description, column definitions, file formats
+```bash
+backlog doc list                    # List all documents
+backlog doc show DOC-N              # Read a specific document
+```
 
-Check what's available in `docs/` and review relevant materials before designing experiments.
+Competition documents (overview, data description, evaluation metric, etc.) are managed as backlog documents. Check what's available and review relevant materials before designing experiments.
 
 ## Phase 1: Plan
 
@@ -137,7 +139,7 @@ Key conventions:
   5. **Postprocessing** — apply any necessary output transforms
   6. **Submission output** — save the final result according to the competition format (e.g., `submission.csv` to `output_dir`, or use the evaluation API if required)
 
-**Submission format**: Follow the competition's specification exactly. Check `docs/{competition_name}/overview.md` and `data.md` for the expected output format, column names, and file naming conventions.
+**Submission format**: Follow the competition's specification exactly. Check the competition overview and data description documents in backlog for the expected output format, column names, and file naming conventions.
 
 ### Code Quality Checks
 
