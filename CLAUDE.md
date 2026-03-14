@@ -47,6 +47,14 @@ uv add --group dev <pkg>  # Add a dev dependency
 
 All `task` commands that run Python use `uv run` internally.
 
+## Commit Messages
+
+- Start with an emoji prefix (e.g., ✨ feature, 🐛 fix, 📝 docs, 💅 style, ♻️ refactor, 🧪 test, 🔧 config, 🚀 experiment).
+- Write in English, 1–2 concise sentences focusing on "why" not "what".
+- For experiment commits, prefix with the experiment name: `🚀 exp001: <description>`.
+- Keep commits focused: separate concerns by topic (e.g., don't mix docs changes with experiment code).
+- When AI tools (e.g., Claude Code) create commits, include a `Co-Authored-By` trailer.
+
 ## Code Quality
 
 - Run `task fmt` before committing. (auto formatting + linting)
