@@ -13,8 +13,8 @@ Guide the full experiment lifecycle: plan, create, implement, train, and record 
 | ---------- | -------------------------------------------------------------------------- |
 | Understand | Review competition docs (`docs/{competition_name}/`)                       |
 | Plan       | Review backlog and past experiments, create experiment task                 |
-| Create     | `task new-exp EXP=expXXX` to create experiment directory with front matter |
-| Implement  | Write train.py, settings.py, run code quality checks, fill README          |
+| Create     | `task new-exp EXP=expXXX` to create experiment directory and backlog task  |
+| Implement  | Write train.py, settings.py, run code quality checks                       |
 | Train      | `task train-local` or `task train-vertex`                                  |
 | Record     | Update README metrics, update backlog task with results                    |
 
@@ -36,8 +36,7 @@ Before starting a new experiment, review the backlog and past experiments:
    backlog task list -l exp --plain    # List all experiment tasks
    backlog overview                     # Project-level summary
    ```
-2. Review past experiment READMEs in `models/` for detailed results
-3. Design the next experiment with a clear hypothesis
+2. Design the next experiment with a clear hypothesis
 
 ### Create Experiment Task in Backlog
 
@@ -48,7 +47,7 @@ backlog task create "expXXX: Short description of experiment" \
   -d "Hypothesis: ... / Changes from base: ... / Expected outcome: ..." \
   -l exp -l expXXX \
   --ac "Training completes without errors" \
-  --ac "CV score recorded in README" \
+  --ac "CV score recorded" \
   --priority medium
 ```
 
@@ -66,34 +65,16 @@ task new-exp EXP=exp002                    # From template
 task new-exp EXP=exp002 SOURCE=exp001      # Copy from existing experiment
 ```
 
-This creates `models/exp002/` with train.py, settings.py, inference.py, and README.md.
+This creates `models/exp002/` with train.py, settings.py, and inference.py. A backlog task is automatically created with labels `exp` and `exp002`.
 
-## Phase 3: Implement, Verify, and Document
+After creation, update the backlog task with experiment details:
 
-### Write README Front Matter
-
-Every experiment README (`models/<exp>/README.md`) MUST start with YAML front matter:
-
-```yaml
----
-name: exp002
-description: |
-  Detailed description of the experiment.
-  Explain the hypothesis, what changes were made from the base experiment,
-  and what you expect to observe.
-model: model_type
-base_experiment: exp001
-metrics: {}
----
+```bash
+backlog task edit TASK-N -d "Hypothesis: ... / Changes from base: ... / Expected outcome: ..."
+backlog task edit TASK-N --plan "Implementation approach: ..."
 ```
 
-Field definitions:
-
-- **name**: Experiment ID (e.g., `exp001`, `exp002`)
-- **description**: Thorough description (hypothesis, changes, expectations)
-- **model**: Model type or architecture name
-- **base_experiment**: Parent experiment (`null` for the first). Auto-populated by `new-exp`.
-- **metrics**: Empty dict `{}` initially; filled in after training
+## Phase 3: Implement and Verify
 
 ### Implement train.py
 
@@ -167,15 +148,6 @@ After writing code, always run:
 
 After implementation and code quality checks pass, commit the changes using the `/commit-commands:commit` skill.
 
-### README Body
-
-Write these sections in the README body:
-
-- **Overview**: Brief summary of what this experiment does and its key idea
-- **Details**: In-depth explanation — feature engineering, model architecture, hyperparameter choices, preprocessing steps
-- **Usage**: How to run (`task train-local EXP=expXXX`, `task train-vertex EXP=expXXX`)
-- **Results**: Left empty until training completes
-
 ## Phase 4: Train
 
 **Always run training commands in the background** using `run_in_background: true` on the Bash tool. Training can take minutes to hours, and blocking the conversation prevents the user from doing other work. After launching, inform the user that training is running and they can check progress with `TaskOutput`.
@@ -222,22 +194,7 @@ Debug mode applies these overrides in `train.py`:
 
 ## Phase 5: Record Results
 
-After training completes, update both the README and the backlog task:
-
-### 1. Update README
-
-1. Fill in `metrics` in the front matter with actual values:
-   ```yaml
-   metrics:
-     cv_score: 0.8765
-     public_lb: 0.8750
-     private_lb: null
-   ```
-2. Write the **Results** section with analysis, per-fold scores, observations, and next steps.
-
-### 2. Update Backlog Task
-
-Record results and close the experiment task:
+After training completes, update the backlog task:
 
 ```bash
 backlog task edit TASK-N --append-notes "CV score: 0.8765, Public LB: 0.8750"

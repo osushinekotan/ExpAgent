@@ -9,18 +9,6 @@ app = SubcommandApp()
 
 def _post_process(target: Path, name: str, source: str) -> None:
     """コピー後のファイルを実験名に合わせて書き換える。"""
-    # README.md: プレースホルダーとbase_experimentを置換
-    readme = target / "README.md"
-    if readme.exists():
-        text = readme.read_text()
-        text = text.replace("__EXP_NAME__", name)
-        # 既存実験からコピーした場合、name と base_experiment を更新
-        if source != "template":
-            text = text.replace(f"name: {source}", f"name: {name}")
-            text = text.replace("base_experiment: null", f"base_experiment: {source}")
-        readme.write_text(text)
-
-    # train.py: exp_name を置換
     train_py = target / "train.py"
     if train_py.exists():
         text = train_py.read_text()
@@ -49,7 +37,7 @@ def _create_backlog_task(name: str, source: str) -> None:
         "--ac",
         "Training completes without errors",
         "--ac",
-        "CV score recorded in README",
+        "CV score recorded",
     ]
     if source != "template":
         cmd.extend(["-l", source])

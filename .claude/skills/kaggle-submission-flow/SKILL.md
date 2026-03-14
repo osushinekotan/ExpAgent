@@ -107,29 +107,7 @@ If a submission fails, check the kernel output on Kaggle. Common failures:
 
 ## Recording Results
 
-After confirming the public score, update the experiment README:
-
-### 1. Update Front Matter Metrics
-
-Add `public_lb` to the metrics in `models/<exp>/README.md`:
-
-```yaml
-metrics:
-  cv_metric1: XX.XX
-  cv_metric2: XX.XX
-  public_lb: XX.XX
-  private_lb: null
-```
-
-Refer to existing experiment READMEs for the metric names used in this competition.
-
-### 2. Update Results Section (if needed)
-
-Add a "Public LB" subsection in the Results section with the score and evaluation metric name.
-
-### 3. Update Backlog Task
-
-Record the public LB score in the experiment's backlog task:
+After confirming the public score, update the backlog task:
 
 ```bash
 backlog task edit TASK-N --append-notes "Public LB: XX.XX"
