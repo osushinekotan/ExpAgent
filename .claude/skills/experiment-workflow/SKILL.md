@@ -80,6 +80,24 @@ backlog task edit TASK-N --plan "Implementation approach: ..."
 
 ## Phase 3: Implement and Verify
 
+### Decide Validation Strategy
+
+Before implementing train.py, decide the cross-validation strategy. The strategy must match how the test set was constructed.
+
+For the decision flow and code examples, read `.claude/skills/experiment-workflow/references/validation-strategy.md`.
+
+Quick reference:
+
+| Condition                                           | Strategy                   |
+| --------------------------------------------------- | -------------------------- |
+| Time-series problem                                 | TimeSeriesSplit            |
+| Train/test split by distinct groups                 | GroupKFold                 |
+| Categorical target or imbalanced classes            | StratifiedKFold            |
+| Multi-label classification                          | MultilabelStratifiedKFold  |
+| None of the above                                   | KFold                      |
+
+Record the chosen validation strategy in the backlog task description or plan.
+
 ### Implement train.py
 
 `train.py` must use `tyro.cli` with a `main()` function to support CLI arguments (e.g., `--debug`):
@@ -221,5 +239,6 @@ backlog task edit TASK-N -s "Done"
 
 - **Directory Settings**: For details on `DirectorySettings` and path resolution across environments, read `.claude/skills/experiment-workflow/references/directory-settings.md`.
 - **Tabular Feature Engineering**: For the `engineer_features` pattern (stateless/stateful separation, `f_` prefix, encoder block, polars), read `.claude/skills/experiment-workflow/references/tabular-feature-engineering.md`.
+- **Validation Strategy**: For choosing the right cross-validation strategy (TimeSeriesSplit, GroupKFold, StratifiedKFold, MultilabelStratifiedKFold, etc.), read `.claude/skills/experiment-workflow/references/validation-strategy.md`.
 - **Backlog**: For backlog CLI usage (task management, documents, decisions), refer to the `backlog` skill.
 - **W&B**: For experiment tracking, metrics logging, and run comparison, refer to the `wandb-primary` skill.
