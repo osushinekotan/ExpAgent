@@ -32,7 +32,8 @@ task --list               # List all available tasks
 | `task build-image`                            | Build and push training Docker image to GAR                            |
 | `task setup-infra`                            | Apply Terraform + build image                                          |
 
-Environment variables are loaded from `.env` (see `.env.example`).
+Competition settings are in `project.yml` (git-tracked, read via `yq` in Taskfile and exported as env vars to all tasks).
+Secrets and GCP settings are loaded from `.env` (see `.env.example`). Requires `yq` (`brew install yq`).
 
 ## Python / uv
 

@@ -145,7 +145,7 @@ def train(
 
     env_vars: dict[str, str] = {
         "BUCKET_NAME": bucket_name,
-        "COMPETITION_NAME": os.getenv("COMPETITION_NAME", ""),
+        "COMPETITION_NAME": os.environ["COMPETITION_NAME"],
     }
     if os.getenv("WANDB_API_KEY"):
         env_vars["WANDB_API_KEY"] = os.environ["WANDB_API_KEY"]

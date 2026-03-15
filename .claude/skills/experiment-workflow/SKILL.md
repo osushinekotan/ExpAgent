@@ -69,7 +69,7 @@ task new-exp EXP=exp002 SOURCE=exp001                 # Copy from existing exper
 
 This creates `models/exp002/` with train.py, settings.py, and inference.py. A backlog task is automatically created with labels `exp` and `exp002`.
 
-If `models/exp002/submission/` exists after creation, this is a **Kaggle code competition** — the model must be submitted as a Kaggle kernel, not a CSV file. The `submission/` directory is auto-included when `COMPETITION_PLATFORM=kaggle` and `IS_CODE_COMPETITION=true` in `.env`. Override with `KAGGLE_CODE_SUB=true` or `KAGGLE_CODE_SUB=false`.
+If `models/exp002/submission/` exists after creation, this is a **Kaggle code competition** — the model must be submitted as a Kaggle kernel, not a CSV file. The `submission/` directory is auto-included when `competition_platform: kaggle` and `is_code_competition: true` in `project.yml`. Override with `KAGGLE_CODE_SUB=true` or `KAGGLE_CODE_SUB=false`.
 
 After creation, update the backlog task with experiment details:
 

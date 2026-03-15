@@ -1,0 +1,6 @@
+competition_name: competition-name
+competition_platform: platform-name # kaggle, signate, etc.
+is_code_competition: false
+
+metadata: # Optional metadata for the competition
+  url: ""

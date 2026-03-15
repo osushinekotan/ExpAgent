@@ -31,6 +31,7 @@ models/
 - [Claude Code](https://claude.ai/claude-code) — AI coding agent
 - [uv](https://github.com/astral-sh/uv) — Python package manager
 - [Task](https://taskfile.dev/) — Task runner (`Taskfile.yml`)
+- [yq](https://github.com/mikefarah/yq) — YAML processor (`brew install yq`)
 - [Terraform](https://github.com/hashicorp/terraform) — Infrastructure provisioning
 - [Backlog](https://github.com/MrLesk/Backlog.md) — Project management CLI
 - [Playwright CLI](https://github.com/microsoft/playwright-cli) — Browser automation
@@ -38,7 +39,41 @@ models/
 
 ## Setup
 
-Install third-party Claude Code skills:
+### 1. Configure project settings
+
+**`project.yml`** (git-tracked) — Competition settings and metadata:
+
+```yaml
+competition_name: "my-competition"
+competition_platform: kaggle # kaggle, signate, etc.
+is_code_competition: false
+
+metadata:
+  url: "https://www.kaggle.com/competitions/my-competition"
+  # Add any key-value pairs: deadline, team_size_limit, etc.
+```
+
+**`.env`** (git-ignored) — Secrets and GCP settings. Copy from `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+```env
+# Kaggle API credentials
+KAGGLE_USERNAME=
+KAGGLE_KEY=
+
+# Google Cloud settings
+PROJECT_ID=
+BUCKET_NAME=        # defaults to competition_name if empty
+REGION=
+
+# Other API keys
+WANDB_API_KEY=
+```
+
+### 2. Install third-party Claude Code skills
 
 ```bash
 npx skills add wandb/skills --agent claude-code --skill '*' --yes

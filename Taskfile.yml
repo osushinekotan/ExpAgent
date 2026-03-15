@@ -2,6 +2,11 @@ version: "3"
 
 dotenv: [".env"]
 
+env:
+  COMPETITION_NAME: "{{.COMPETITION_NAME}}"
+  COMPETITION_PLATFORM: "{{.COMPETITION_PLATFORM}}"
+  IS_CODE_COMPETITION: "{{.IS_CODE_COMPETITION}}"
+
 vars:
   EXP: '{{.EXP | default "exp001"}}'
   MACHINE_TYPE: '{{.MACHINE_TYPE | default ""}}'
@@ -9,6 +14,12 @@ vars:
   GAR_IMAGE: "{{.REGION}}-docker.pkg.dev/{{.PROJECT_ID}}/training-images/training:latest"
   PUSH_DEPS: '{{.PUSH_DEPS | default "true"}}'
   EXTRA_ARGS: '{{.EXTRA_ARGS | default ""}}'
+  COMPETITION_NAME:
+    sh: yq '.competition_name' project.yml
+  COMPETITION_PLATFORM:
+    sh: yq '.competition_platform' project.yml
+  IS_CODE_COMPETITION:
+    sh: yq '.is_code_competition' project.yml
   BUCKET_NAME: "{{if .BUCKET_NAME}}{{.BUCKET_NAME}}{{else}}{{.COMPETITION_NAME}}{{end}}"
   ARTIFACT_EXCLUDE: "checkpoint-.*|debug/"
 

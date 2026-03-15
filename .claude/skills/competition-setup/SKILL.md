@@ -7,14 +7,27 @@ description: This skill should be used when the user asks to "setup competition"
 
 End-to-end setup workflow for a competition project: GCP infrastructure provisioning, Docker image build, and competition data download to both local and GCS.
 
-## Step 0: Ask the User About Their Competition
+## Step 0: Gather Competition Info and Update project.yml
 
-Before proceeding, ask the user:
+First, read `project.yml` to check if competition settings are already filled in. If not, ask the user:
 
 1. **Competition platform**: Which platform is the competition on? (Kaggle / Other)
 2. **Competition name**: What is the competition name (slug)?
+3. **Competition URL**: What is the competition page URL?
+4. **Is this a code competition?**: (Kaggle only) Does the competition require kernel submission?
 
-Use the `AskUserQuestion` tool to gather this information.
+Use the `AskUserQuestion` tool to gather missing information, then update `project.yml` accordingly:
+
+```yaml
+competition_name: "the-competition-slug"
+competition_platform: kaggle
+is_code_competition: false
+
+metadata:
+  url: "https://www.kaggle.com/competitions/the-competition-slug"
+```
+
+The `metadata` section is freeform — add any useful key-value pairs (e.g., `deadline`, `team_size_limit`, `submission_limit`).
 
 - If the platform is **Kaggle**: Proceed with all phases below (including automated data download).
 - If the platform is **other** (e.g., AtCoder, signate, etc.): Skip Phase 0 (Kaggle credentials) and Phase 3 (automated data download). Instead, inform the user:
@@ -27,9 +40,10 @@ Infrastructure setup (Phase 1 & 2) is common across all platforms.
 Before starting, ensure the following are configured:
 
 - **GCP authentication**: `gcloud auth application-default login` and `gcloud auth login`
-- **`.env` file**: Copy from `.env.example` and fill in required values (`PROJECT_ID`, `REGION`, `COMPETITION_NAME`)
+- **`project.yml`**: Fill in competition settings (`competition_name`, `competition_platform`, `is_code_competition`)
+- **`.env` file**: Copy from `.env.example` and fill in required values (`PROJECT_ID`, `REGION`)
   - For Kaggle competitions, also set `KAGGLE_USERNAME` and `KAGGLE_KEY`
-- **Tools installed**: `gcloud`, `terraform`, `task` (Taskfile), `uv`
+- **Tools installed**: `gcloud`, `terraform`, `task` (Taskfile), `uv`, `yq`
 
 ## Setup Workflow
 
@@ -106,9 +120,11 @@ Gather competition information and record it as backlog documents. This is criti
 
 #### 5-1. Get the competition page URL
 
-If the competition URL is not already known, use `AskUserQuestion` to ask the user:
+Read `project.yml` and check `metadata.url`. If it is empty, use `AskUserQuestion` to ask the user:
 
 > コンペティションページの URL を教えてください。
+
+Then update `metadata.url` in `project.yml` with the provided URL.
 
 #### 5-2. Fetch and analyze the competition page
 
@@ -170,12 +186,13 @@ gcloud storage ls gs://{BUCKET_NAME}/data/input/{COMPETITION_NAME}/
 
 ## Key Files
 
-| File                                             | Purpose                      |
-| ------------------------------------------------ | ---------------------------- |
-| `terraform/environments/dev/`                    | Terraform configuration      |
-| `docker/Dockerfile.training`                     | Training container image     |
-| `docker/entrypoint.sh`                           | Container entrypoint script  |
-| `docker/cloudbuild.yaml`                         | Cloud Build configuration    |
-| `src/kaggle_ops/vertex.py`                       | Vertex AI job submission     |
-| `src/kaggle_ops/scripts/download_competition.py` | GCS download script          |
-| `.backlog/`                                      | Project management (Backlog) |
+| File                                             | Purpose                         |
+| ------------------------------------------------ | ------------------------------- |
+| `project.yml`                                    | Competition settings & metadata |
+| `terraform/environments/dev/`                    | Terraform configuration         |
+| `docker/Dockerfile.training`                     | Training container image        |
+| `docker/entrypoint.sh`                           | Container entrypoint script     |
+| `docker/cloudbuild.yaml`                         | Cloud Build configuration       |
+| `src/kaggle_ops/vertex.py`                       | Vertex AI job submission        |
+| `src/kaggle_ops/scripts/download_competition.py` | GCS download script             |
+| `.backlog/`                                      | Project management (Backlog)    |
