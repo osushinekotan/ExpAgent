@@ -73,8 +73,10 @@ def exp(name: str, source: str = "template", kaggle_code_sub: Literal["auto", "t
     assert not target.exists(), f"Already exists: {target}"
 
     include_submission = _resolve_code_sub(kaggle_code_sub)
-    ignore = None if include_submission else shutil.ignore_patterns("submission")
-    shutil.copytree(src, target, ignore=ignore)
+    ignore_patterns = ["artifacts"]
+    if not include_submission:
+        ignore_patterns.append("submission")
+    shutil.copytree(src, target, ignore=shutil.ignore_patterns(*ignore_patterns))
     _post_process(target, name, source)
     print(f"Created: {target} (from {src})")
     _create_backlog_task(name, source)
