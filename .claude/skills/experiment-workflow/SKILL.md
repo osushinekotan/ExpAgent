@@ -24,7 +24,7 @@ Before planning any experiment, review the competition documentation stored in b
 
 ```bash
 backlog doc list                    # List all documents
-backlog doc show DOC-N              # Read a specific document
+backlog doc view DOC-N              # Read a specific document
 ```
 
 Competition documents (overview, data description, evaluation metric, etc.) are managed as backlog documents. Check what's available and review relevant materials before designing experiments.
@@ -35,8 +35,8 @@ Before starting a new experiment, review the backlog and past experiments:
 
 1. Check backlog for experiment history and project state:
    ```bash
-   backlog task list -l exp --plain    # List all experiment tasks
-   backlog overview                     # Project-level summary
+   backlog search --type task exp --plain   # Search experiment tasks
+   backlog overview                          # Project-level summary
    ```
 2. Design the next experiment with a clear hypothesis
 
