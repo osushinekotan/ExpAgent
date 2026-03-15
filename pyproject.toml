@@ -1,7 +1,7 @@
 [project]
-name = "kaggle-agent-template"
+name = "ExpAgent"
 version = "0.1.0"
-description = "kaggle competition"
+description = ""
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
