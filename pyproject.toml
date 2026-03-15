@@ -17,6 +17,7 @@ dependencies = [
     "scikit-learn>=1.8.0",
     "pandas>=3.0.0",
     "stickytape>=0.2.1",
+    "wandb>=0.25.1",
 ]
 
 [dependency-groups]
