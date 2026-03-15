@@ -86,12 +86,14 @@ Before implementing train.py, decide the cross-validation strategy. The strategy
 
 For the decision flow and code examples, read `.claude/skills/experiment-workflow/references/validation-strategy.md`.
 
+For code competitions where test data is hidden, check public notebooks/discussions or ask the user to confirm assumptions about the test split.
+
 Quick reference:
 
 | Condition                                           | Strategy                   |
 | --------------------------------------------------- | -------------------------- |
 | Time-series problem                                 | TimeSeriesSplit            |
-| Train/test split by distinct groups                 | GroupKFold                 |
+| Train/test split by distinct groups                 | StratifiedGroupKFold       |
 | Categorical target or imbalanced classes            | StratifiedKFold            |
 | Multi-label classification                          | MultilabelStratifiedKFold  |
 | None of the above                                   | KFold                      |

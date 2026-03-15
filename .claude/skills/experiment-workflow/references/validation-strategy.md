@@ -2,6 +2,17 @@
 
 Guide for choosing the right cross-validation strategy based on the data characteristics.
 
+## Gathering Information
+
+Before deciding on a strategy, understand how the test set was constructed:
+
+- **Standard competition**: Train/test split is known from the data description. Check group overlap, temporal ordering, and target distribution.
+- **Code competition**: Test data is hidden or only partially visible. Rely on:
+  - Competition description and data overview documents in backlog
+  - Public notebooks and discussions on Kaggle (search for "CV strategy", "validation", "fold")
+  - Ask the user — they may have insights from the forum or prior experiments
+  - When uncertain, use `AskUserQuestion` to confirm the assumed split characteristics before implementing
+
 ## Decision Flow
 
 ```
@@ -11,7 +22,7 @@ Guide for choosing the right cross-validation strategy based on the data charact
 
 2. Are train/test split by distinct groups (e.g., categories, users, entities)?
    (i.e., groups in test never appear in train)
-   └─ Yes → GroupKFold / StratifiedGroupKFold
+   └─ Yes → StratifiedGroupKFold (default over GroupKFold)
    └─ No ↓
 
 3. Is it a multi-label classification problem?
@@ -44,26 +55,32 @@ for train_idx, val_idx in splitter.split(df):
 - Consider using a gap between train and validation to simulate real prediction lag.
 - Variant: sliding window with fixed training size (`max_train_size` parameter).
 
-### GroupKFold / StratifiedGroupKFold
+### StratifiedGroupKFold (default for group splits)
 
 Use when train and test are split by a group column (e.g., different categories, users, or entities appear exclusively in either train or test). Ensures no group leaks across folds.
 
-```python
-from sklearn.model_selection import GroupKFold, StratifiedGroupKFold
+**Always prefer `StratifiedGroupKFold` over `GroupKFold`**. `StratifiedGroupKFold` supports `shuffle` and `random_state`, making fold assignments reproducible. `GroupKFold` does not accept these parameters, so results depend on data order.
 
-# GroupKFold: groups don't leak, no stratification
-splitter = GroupKFold(n_splits=5)
-for train_idx, val_idx in splitter.split(df, groups=df["group_col"]):
+For regression targets, bin the target into quantile bins (e.g., `pd.qcut(df["target"], q=10, labels=False, duplicates="drop")`) and pass the binned values as `y` for stratification. This makes `StratifiedGroupKFold` usable in any setting.
+
+```python
+from sklearn.model_selection import StratifiedGroupKFold
+
+splitter = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=42)
+
+# Classification: use target directly
+for train_idx, val_idx in splitter.split(df, df["target"], groups=df["group_col"]):
     ...
 
-# StratifiedGroupKFold: groups don't leak + target distribution preserved
-splitter = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=42)
-for train_idx, val_idx in splitter.split(df, df["target"], groups=df["group_col"]):
+# Regression: bin target for stratification
+import pandas as pd
+y_binned = pd.qcut(df["target"], q=10, labels=False, duplicates="drop")
+for train_idx, val_idx in splitter.split(df, y_binned, groups=df["group_col"]):
     ...
 ```
 
 - Identify the group column by checking which column separates train/test without overlap.
-- Prefer `StratifiedGroupKFold` when target imbalance is also a concern.
+- Fall back to `GroupKFold` only if stratification is truly impossible (e.g., single-sample groups with unique targets).
 
 ### MultilabelStratifiedKFold
 
