@@ -213,5 +213,6 @@ backlog task edit TASK-N -s "Done"
 ## References
 
 - **Directory Settings**: For details on `DirectorySettings` and path resolution across environments, read `.claude/skills/experiment-workflow/references/directory-settings.md`.
+- **Tabular Feature Engineering**: For the `engineer_features` pattern (stateless/stateful separation, `f_` prefix, encoder block, polars), read `.claude/skills/experiment-workflow/references/tabular-feature-engineering.md`.
 - **Backlog**: For backlog CLI usage (task management, documents, decisions), refer to the `backlog` skill.
 - **W&B**: For experiment tracking, metrics logging, and run comparison, refer to the `wandb-primary` skill.
