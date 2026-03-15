@@ -1,31 +1,49 @@
 ---
-name: kaggle-competition-setup
-description: This skill should be used when the user asks to "setup competition", "setup infra", "GCP setup", "GCPセットアップ", "初期セットアップ", "コンペのセットアップ", "インフラ構築", "データダウンロード", "download competition data", "setup environment", "環境構築", or wants to initialize infrastructure and download Kaggle competition data for a new competition project.
+name: competition-setup
+description: This skill should be used when the user asks to "setup competition", "setup infra", "GCP setup", "GCPセットアップ", "初期セットアップ", "コンペのセットアップ", "インフラ構築", "データダウンロード", "download competition data", "setup environment", "環境構築", or wants to initialize infrastructure and download competition data for a new competition project.
 ---
 
-# Kaggle Competition Setup
+# Competition Setup
 
-End-to-end setup workflow for a Kaggle competition project: GCP infrastructure provisioning, Docker image build, and competition data download to both local and GCS.
+End-to-end setup workflow for a competition project: GCP infrastructure provisioning, Docker image build, and competition data download to both local and GCS.
+
+## Step 0: Ask the User About Their Competition
+
+Before proceeding, ask the user:
+
+1. **Competition platform**: Which platform is the competition on? (Kaggle / Other)
+2. **Competition name**: What is the competition name (slug)?
+
+Use the `AskUserQuestion` tool to gather this information.
+
+- If the platform is **Kaggle**: Proceed with all phases below (including automated data download).
+- If the platform is **other** (e.g., AtCoder, signate, etc.): Skip Phase 0 (Kaggle credentials) and Phase 3 (automated data download). Instead, inform the user:
+  > このプラットフォームでは自動データダウンロードに対応していません。手動でデータをダウンロードして `data/input/{COMPETITION_NAME}/` に配置してください。GCS へのアップロードは `task push-data` で行えます。
+
+Infrastructure setup (Phase 1 & 2) is common across all platforms.
 
 ## Prerequisites
 
 Before starting, ensure the following are configured:
 
 - **GCP authentication**: `gcloud auth application-default login` and `gcloud auth login`
-- **`.env` file**: Copy from `.env.example` and fill in required values (`PROJECT_ID`, `REGION`, `KAGGLE_USERNAME`, `KAGGLE_KEY`, `COMPETITION_NAME`)
+- **`.env` file**: Copy from `.env.example` and fill in required values (`PROJECT_ID`, `REGION`, `COMPETITION_NAME`)
+  - For Kaggle competitions, also set `KAGGLE_USERNAME` and `KAGGLE_KEY`
 - **Tools installed**: `gcloud`, `terraform`, `task` (Taskfile), `uv`
 
 ## Setup Workflow
 
 Execute the following phases in order. Each phase depends on the previous one completing successfully.
 
-### Phase 0: Setup Kaggle Credentials
+### Phase 0: Setup Kaggle Credentials (Kaggle only)
 
 ```bash
 bash scripts/setup_kaggle_json.sh
 ```
 
 This reads `KAGGLE_USERNAME` and `KAGGLE_KEY` from `.env` and generates `~/.kaggle/kaggle.json` (chmod 600). If the file already exists, it is force-overwritten.
+
+**Skip this phase for non-Kaggle competitions.**
 
 ### Phase 1: Initialize Terraform Backend
 
@@ -54,7 +72,7 @@ This provisions:
 - **Vertex AI API** enablement
 - **Docker image** built and pushed to Artifact Registry via Cloud Build
 
-### Phase 3: Download Competition Data
+### Phase 3: Download Competition Data (Kaggle only)
 
 Run both downloads in parallel — they are independent:
 
@@ -65,6 +83,8 @@ task dl-kaggle-comp-gcs     # Download to GCS via Vertex AI job
 
 - **Local download** (`dl-kaggle-comp`): Downloads directly to `data/input/` using Kaggle API
 - **GCS download** (`dl-kaggle-comp-gcs`): Submits a Vertex AI custom job that downloads data directly to `gs://{BUCKET_NAME}/data/input/`
+
+**Skip this phase for non-Kaggle competitions.** Instead, manually download data and place it in `data/input/{COMPETITION_NAME}/`, then run `task push-data` to sync to GCS.
 
 ## Troubleshooting
 
