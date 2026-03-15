@@ -33,11 +33,13 @@ IGNORE_PATTERNS = [
 
 
 def _check_dataset_exists(client: KaggleApi, handle: str) -> bool:
-    return any(str(ds.ref) == handle for ds in client.dataset_list(user=KAGGLE_USERNAME))
+    datasets = client.dataset_list(user=KAGGLE_USERNAME) or []
+    return any(str(ds.ref) == handle for ds in datasets)  # type: ignore[union-attr]
 
 
 def _check_model_exists(client: KaggleApi, handle: str) -> bool:
-    return any(str(m) == handle for m in client.model_list(owner=KAGGLE_USERNAME))
+    models = client.model_list(owner=KAGGLE_USERNAME) or []
+    return any(str(m) == handle for m in models)
 
 
 def _check_model_instance_exists(client: KaggleApi, handle: str) -> bool:
@@ -139,7 +141,7 @@ def dataset_upload(
 
         if exists and update:
             client.dataset_create_version(
-                folder=dst,
+                folder=str(dst),
                 version_notes="latest",
                 quiet=False,
                 convert_to_csv=False,
@@ -147,7 +149,7 @@ def dataset_upload(
                 dir_mode="zip",
             )
         else:
-            client.dataset_create_new(folder=dst, public=False, quiet=False, dir_mode="zip")
+            client.dataset_create_new(folder=str(dst), public=False, quiet=False, dir_mode="zip")
 
 
 def competition_download(
@@ -158,7 +160,7 @@ def competition_download(
     zipfile_path.parent.mkdir(exist_ok=True, parents=True)
 
     if not zipfile_path.is_file() or force_download:
-        client.competition_download_files(competition=handle, path=out_dir, quiet=False, force=force_download)
+        client.competition_download_files(competition=handle, path=str(out_dir), quiet=False, force=force_download)
         subprocess.run(["unzip", "-o", "-q", str(zipfile_path), "-d", str(out_dir)], check=False)
     else:
         logger.info(f"Dataset ({handle}) already exists.")

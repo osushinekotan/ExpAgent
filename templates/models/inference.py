@@ -1,5 +1,5 @@
 from settings import DirectorySettings
-from train import predict  # noqa: F401
+from train import predict  # type: ignore[attr-defined]  # noqa: F401
 
 
 def main() -> None:

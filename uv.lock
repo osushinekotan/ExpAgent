@@ -272,6 +272,57 @@ wheels = [
 ]
 
 [[package]]
+name = "expagent"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "google-cloud-aiplatform" },
+    { name = "kaggle" },
+    { name = "lightgbm" },
+    { name = "nbformat" },
+    { name = "pandas" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "python-dotenv" },
+    { name = "rootutils" },
+    { name = "scikit-learn" },
+    { name = "stickytape" },
+    { name = "tyro" },
+    { name = "wandb" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "ruff" },
+    { name = "ty" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "google-cloud-aiplatform", specifier = ">=1.74.0" },
+    { name = "kaggle", specifier = ">=1.8.4" },
+    { name = "lightgbm", specifier = ">=4.6.0" },
+    { name = "nbformat", specifier = ">=5.10.4" },
+    { name = "pandas", specifier = ">=3.0.0" },
+    { name = "pydantic", specifier = ">=2.12.5" },
+    { name = "pydantic-settings", specifier = ">=2.12.0" },
+    { name = "python-dotenv", specifier = ">=1.1.1" },
+    { name = "rootutils", specifier = ">=1.0.7" },
+    { name = "scikit-learn", specifier = ">=1.8.0" },
+    { name = "stickytape", specifier = ">=0.2.1" },
+    { name = "tyro", specifier = ">=1.0.6" },
+    { name = "wandb", specifier = ">=0.25.1" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=9.0.2" },
+    { name = "ruff", specifier = ">=0.14.13" },
+    { name = "ty", specifier = ">=0.0.12" },
+]
+
+[[package]]
 name = "fastjsonschema"
 version = "2.21.2"
 source = { registry = "https://pypi.org/simple" }
@@ -697,57 +748,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/14/c7/4e9e7b742b637e32b6afe2b7723e17195627f0bc25c6fffdd7d09fdfe33b/kaggle-2.0.0.tar.gz", hash = "sha256:34cb700cec37273a39ca54f4b18bebc3b6609d08bd03351fc205f9178f79f9ca", size = 136535, upload-time = "2026-02-11T19:46:12.495Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0c/b0/868ff7b15389a35fbe49769b383a683ade21deb16565e84b7ad45af976d3/kaggle-2.0.0-py3-none-any.whl", hash = "sha256:91b3f717e529e57dd40c6c44513e25218674636fb1b143031370ad33c5f1a7e2", size = 75462, upload-time = "2026-02-11T19:46:11.488Z" },
-]
-
-[[package]]
-name = "kaggle-agent-template"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "google-cloud-aiplatform" },
-    { name = "kaggle" },
-    { name = "lightgbm" },
-    { name = "nbformat" },
-    { name = "pandas" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "python-dotenv" },
-    { name = "rootutils" },
-    { name = "scikit-learn" },
-    { name = "stickytape" },
-    { name = "tyro" },
-    { name = "wandb" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "ruff" },
-    { name = "ty" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "google-cloud-aiplatform", specifier = ">=1.74.0" },
-    { name = "kaggle", specifier = ">=1.8.4" },
-    { name = "lightgbm", specifier = ">=4.6.0" },
-    { name = "nbformat", specifier = ">=5.10.4" },
-    { name = "pandas", specifier = ">=3.0.0" },
-    { name = "pydantic", specifier = ">=2.12.5" },
-    { name = "pydantic-settings", specifier = ">=2.12.0" },
-    { name = "python-dotenv", specifier = ">=1.1.1" },
-    { name = "rootutils", specifier = ">=1.0.7" },
-    { name = "scikit-learn", specifier = ">=1.8.0" },
-    { name = "stickytape", specifier = ">=0.2.1" },
-    { name = "tyro", specifier = ">=1.0.6" },
-    { name = "wandb", specifier = ">=0.25.1" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pytest", specifier = ">=9.0.2" },
-    { name = "ruff", specifier = ">=0.14.13" },
-    { name = "ty", specifier = ">=0.0.12" },
 ]
 
 [[package]]

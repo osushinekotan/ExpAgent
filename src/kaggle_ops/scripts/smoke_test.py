@@ -9,7 +9,7 @@ print(f"Python: {sys.version}")
 
 # GPU 確認
 try:
-    import torch
+    import torch  # type: ignore[import-not-found]
 
     print(f"PyTorch: {torch.__version__}")
     print(f"CUDA available: {torch.cuda.is_available()}")
