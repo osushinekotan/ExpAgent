@@ -201,11 +201,18 @@ Debug mode applies these overrides in `train.py`:
 
 ## Phase 5: Record Results
 
-After training completes, update the backlog task:
+After training completes, **immediately** record the CV score in the backlog task. Do not wait for user instruction — this is an automatic step after every successful training run.
 
 ```bash
-backlog task edit TASK-N --append-notes "CV score: 0.8765, Public LB: 0.8750"
+# Recode CV score immediately after training completes
+backlog task edit TASK-N --append-notes "CV score: 0.8765 (config summary)"
 backlog task edit TASK-N --check-ac 1 --check-ac 2
+```
+
+**LB score** is recorded later when the user provides feedback after submission (e.g., "Public LB: 0.8750"). At that point, update the task with the full summary:
+
+```bash
+backlog task edit TASK-N --append-notes "Public LB: 0.8750"
 backlog task edit TASK-N --final-summary "CV=0.8765, LB=0.8750. Next: try feature X (see TASK-M)"
 backlog task edit TASK-N -s "Done"
 ```
