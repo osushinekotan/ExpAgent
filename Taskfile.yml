@@ -77,22 +77,21 @@ tasks:
 
   # Experiment
   new-exp:
-    desc: Create a new experiment (set KAGGLE_METADATA=false to skip metadata setup)
+    desc: Create a new experiment
     vars:
       SOURCE: '{{.SOURCE | default "template"}}'
-      KAGGLE_METADATA: '{{.KAGGLE_METADATA | default "true"}}'
       KAGGLE_CODE_SUB: '{{.KAGGLE_CODE_SUB | default "auto"}}'
     cmds:
       - uv run python -m src.new exp --name {{.EXP}} --source {{.SOURCE}} --kaggle-code-sub {{.KAGGLE_CODE_SUB}}
-      - '{{if eq .KAGGLE_METADATA "true"}}task setup-kaggle-metadata EXP={{.EXP}}{{end}}'
+      - '{{if eq .COMPETITION_PLATFORM "kaggle"}}task setup-kaggle-metadata EXP={{.EXP}}{{end}}'
 
   setup-kaggle-metadata:
-    desc: Setup experiment metadata and code
+    desc: Setup Kaggle experiment metadata and code
     cmds:
       - uv run python -m src.kaggle_ops.write deps-metadata
       - uv run python -m src.kaggle_ops.write deps-code
-      - uv run python -m src.kaggle_ops.write submission-code --exp {{.EXP}}
-      - uv run python -m src.kaggle_ops.write submission-metadata --exp {{.EXP}} --model-source-names {{.EXP}}
+      - '{{if eq .IS_CODE_COMPETITION "true"}}uv run python -m src.kaggle_ops.write submission-code --exp {{.EXP}}{{end}}'
+      - '{{if eq .IS_CODE_COMPETITION "true"}}uv run python -m src.kaggle_ops.write submission-metadata --exp {{.EXP}} --model-source-names {{.EXP}}{{end}}'
 
   # Data
   # NOTE: gcloud storage の sliced download では .gstmp 一時ファイルが残るバグがあるため、
