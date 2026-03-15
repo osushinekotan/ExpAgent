@@ -100,6 +100,45 @@ After initialization, create a milestone for the competition deadline if known:
 backlog milestone create "Competition Deadline" --due {DEADLINE_DATE}
 ```
 
+### Phase 5: Research Competition Overview
+
+Gather competition information and record it as backlog documents. This is critical — the experiment-workflow skill depends on these documents (Phase 0: Understand the Competition).
+
+#### 5-1. Get the competition page URL
+
+If the competition URL is not already known, use `AskUserQuestion` to ask the user:
+
+> コンペティションページの URL を教えてください。
+
+#### 5-2. Fetch and analyze the competition page
+
+Use `WebFetch` (and `WebSearch` if needed) to collect information from the competition page. Extract as much as possible:
+
+- **Competition overview**: What is the goal? What problem are we solving?
+- **Meta information**: Deadline, team size limit, submission limits per day, prize, code competition or not, etc.
+- **Evaluation metric**: Exact metric name, formula if available, optimization direction (higher/lower is better)
+- **Data description**: What files are provided, column descriptions, data types, size
+- **Any other useful info**: Rules, external data policy, special constraints, hardware limits, etc.
+
+#### 5-3. Record findings as backlog documents
+
+Create separate backlog documents for each topic, then edit them with the collected content:
+
+```bash
+backlog doc create "Competition Overview"
+# Edit the created document file with: competition goal, meta info (deadline, team size, submission limits, prizes, code comp flag)
+
+backlog doc create "Evaluation Metric"
+# Edit the created document file with: metric name, formula, optimization direction, any edge cases
+
+backlog doc create "Data Description"
+# Edit the created document file with: file list, column descriptions, data types, sizes, relationships between files
+```
+
+After `backlog doc create`, open and edit the generated markdown file directly (the path is shown in the command output). Write the collected information in a clear, structured format.
+
+If additional useful information was found (e.g., rules about external data, specific constraints), either add it to the relevant document or create additional documents as needed.
+
 ## Troubleshooting
 
 ### Common Issues
@@ -131,12 +170,12 @@ gcloud storage ls gs://{BUCKET_NAME}/data/input/{COMPETITION_NAME}/
 
 ## Key Files
 
-| File                                             | Purpose                     |
-| ------------------------------------------------ | --------------------------- |
-| `terraform/environments/dev/`                    | Terraform configuration     |
-| `docker/Dockerfile.training`                     | Training container image    |
-| `docker/entrypoint.sh`                           | Container entrypoint script |
-| `docker/cloudbuild.yaml`                         | Cloud Build configuration   |
-| `src/kaggle_ops/vertex.py`                       | Vertex AI job submission    |
-| `src/kaggle_ops/scripts/download_competition.py` | GCS download script         |
+| File                                             | Purpose                      |
+| ------------------------------------------------ | ---------------------------- |
+| `terraform/environments/dev/`                    | Terraform configuration      |
+| `docker/Dockerfile.training`                     | Training container image     |
+| `docker/entrypoint.sh`                           | Container entrypoint script  |
+| `docker/cloudbuild.yaml`                         | Cloud Build configuration    |
+| `src/kaggle_ops/vertex.py`                       | Vertex AI job submission     |
+| `src/kaggle_ops/scripts/download_competition.py` | GCS download script          |
 | `.backlog/`                                      | Project management (Backlog) |
