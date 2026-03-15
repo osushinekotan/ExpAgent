@@ -181,6 +181,7 @@ task train-local EXP=exp002                                        # Run trainin
 task train-vertex EXP=exp002 ACCELERATOR_TYPE=NVIDIA_L4             # Vertex AI with L4 (auto machine type)
 task train-local EXP=exp002 EXTRA_ARGS="--debug"                   # Debug run locally (epochs=1, data limited)
 task train-vertex EXP=exp002 EXTRA_ARGS="--debug"                  # Debug run on Vertex AI
+task run-local SCRIPT=models/exp002/inference.py                    # Run inference locally
 ```
 
 ### Debug mode

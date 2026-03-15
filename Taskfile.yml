@@ -160,6 +160,11 @@ tasks:
     cmds:
       - uv run python models/{{.EXP}}/train.py {{.EXTRA_ARGS}}
 
+  run-local:
+    desc: "Run a Python script locally (e.g. task run-local SCRIPT=models/exp001/inference.py)"
+    cmds:
+      - uv run python {{.SCRIPT}} {{.EXTRA_ARGS}}
+
   train-vertex:
     desc: |
       Run training on Vertex AI.

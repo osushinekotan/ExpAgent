@@ -18,19 +18,20 @@ task --list               # List all available tasks
 
 ### Key Tasks
 
-| Task                                          | Description                                                            |
-| --------------------------------------------- | ---------------------------------------------------------------------- |
-| `task fmt`                                    | Format code (ruff check --fix + ruff format)                           |
-| `task ty`                                     | Type check (ty check)                                                  |
-| `task train-local EXP=exp001`                 | Run training locally                                                   |
-| `task train-vertex EXP=exp001`                | Run training on Vertex AI                                              |
-| `task new-exp EXP=exp002`                     | Create a new experiment                                                |
-| `task dl-kaggle-comp`                         | Download competition dataset                                           |
-| `task push-data` / `task pull-data`           | Sync data with GCS                                                     |
-| `task push-artifacts` / `task pull-artifacts` | Sync model artifacts with GCS                                          |
-| `task submit-kaggle EXP=exp001`               | Full Kaggle submission pipeline (add PUSH_DEPS=true to also push deps) |
-| `task build-image`                            | Build and push training Docker image to GAR                            |
-| `task setup-infra`                            | Apply Terraform + build image                                          |
+| Task                                               | Description                                                            |
+| -------------------------------------------------- | ---------------------------------------------------------------------- |
+| `task fmt`                                         | Format code (ruff check --fix + ruff format)                           |
+| `task ty`                                          | Type check (ty check)                                                  |
+| `task train-local EXP=exp001`                      | Run training locally                                                   |
+| `task train-vertex EXP=exp001`                     | Run training on Vertex AI                                              |
+| `task run-local SCRIPT=models/exp001/inference.py` | Run any Python script locally                                          |
+| `task new-exp EXP=exp002`                          | Create a new experiment                                                |
+| `task dl-kaggle-comp`                              | Download competition dataset                                           |
+| `task push-data` / `task pull-data`                | Sync data with GCS                                                     |
+| `task push-artifacts` / `task pull-artifacts`      | Sync model artifacts with GCS                                          |
+| `task submit-kaggle EXP=exp001`                    | Full Kaggle submission pipeline (add PUSH_DEPS=true to also push deps) |
+| `task build-image`                                 | Build and push training Docker image to GAR                            |
+| `task setup-infra`                                 | Apply Terraform + build image                                          |
 
 Competition settings are in `project.yml` (git-tracked, read via `yq` in Taskfile and exported as env vars to all tasks).
 Secrets and GCP settings are loaded from `.env` (see `.env.example`). Requires `yq` (`brew install yq`).
