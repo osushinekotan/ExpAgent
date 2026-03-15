@@ -120,6 +120,8 @@ Key conventions:
 - `debug: bool = False` is the standard flag; add other CLI args as needed
 - After training, run validation inference using `predict()` (same pipeline as submission) and compute evaluation metrics
 - Save OOF predictions CSV to `artifact_dir`
+- **Save metrics as `metrics.json` to `artifact_dir`**: Include CV score, per-fold scores, and config. This enables programmatic comparison across experiments without relying on wandb.
+- **Save OOF analysis plots to `artifact_dir`**: Visualize OOF predictions vs ground truth. Choose plots appropriate for the task (e.g., scatter + residuals for regression, confusion matrix + calibration for classification).
 - **All hyperparameters and tunable constants must be defined in `Config`** (in `settings.py`). Do not use module-level constants for tunable values. This centralizes experiment configuration and makes it easy to compare settings across experiments.
 
 ### Implement inference.py (Submission Pipeline)
