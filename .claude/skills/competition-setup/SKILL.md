@@ -106,13 +106,7 @@ task dl-kaggle-comp-gcs     # Download to GCS via Vertex AI job
 backlog init {COMPETITION_NAME} --integration-mode none --defaults
 ```
 
-This creates a `.backlog/` directory for tracking tasks, milestones, documents, and decisions throughout the competition. Skip if `.backlog/` already exists.
-
-After initialization, create a milestone for the competition deadline if known:
-
-```bash
-backlog milestone create "Competition Deadline" --due {DEADLINE_DATE}
-```
+This creates a `backlog/` directory for tracking tasks, milestones, documents, and decisions throughout the competition. Skip if `backlog/` already exists.
 
 ### Phase 5: Research Competition Overview
 

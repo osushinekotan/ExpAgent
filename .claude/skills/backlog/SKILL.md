@@ -38,7 +38,7 @@ To set up backlog in a repository:
 backlog init [projectName]
 ```
 
-This creates a `.backlog/` directory with the project structure. Run this once per repository before using other commands.
+This creates a `backlog/` directory with the project structure. Run this once per repository before using other commands.
 
 ## Session Continuity (1 Task = 1 Session)
 
@@ -150,9 +150,27 @@ backlog board export kanban.md
 
 ### Milestones
 
-Track project phases:
+Track project phases. There is no `milestone create` CLI command — create milestone files directly in `backlog/milestones/`:
 
 ```bash
+# Create a milestone by writing the file directly
+# IMPORTANT: File name must match pattern "m-{N}.md" (e.g., m-1.md, m-2.md)
+# Frontmatter must have "id" and "title" fields. Content uses "## Description" section.
+cat > backlog/milestones/m-1.md << 'EOF'
+---
+id: m-1
+title: v1.0
+---
+
+## Description
+
+Milestone description here.
+EOF
+
+# Assign milestone to a task (use milestone title as label)
+backlog task create "Some task" # then reference in frontmatter: milestone: "v1.0"
+backlog task edit TASK-1  # milestone field in task frontmatter links to milestone title
+
 # List milestones with completion status
 backlog milestone list
 backlog milestone list --plain
@@ -172,8 +190,12 @@ backlog doc create "Architecture Overview"
 # List documents
 backlog doc list
 
-# View document
+# View document (opens pager - for interactive use)
 backlog doc view DOC-1
+
+# Read document programmatically (doc view uses a pager, so read the file directly)
+# Files are in backlog/docs/ with format: "doc-N - Title.md"
+cat "backlog/docs/doc-1 - Architecture-Overview.md"
 ```
 
 ### Decisions
