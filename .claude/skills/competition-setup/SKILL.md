@@ -86,6 +86,20 @@ task dl-kaggle-comp-gcs     # Download to GCS via Vertex AI job
 
 **Skip this phase for non-Kaggle competitions.** Instead, manually download data and place it in `data/input/{COMPETITION_NAME}/`, then run `task push-data` to sync to GCS.
 
+### Phase 4: Initialize Backlog (Project Management)
+
+```bash
+backlog init {COMPETITION_NAME} --integration-mode none --defaults
+```
+
+This creates a `.backlog/` directory for tracking tasks, milestones, documents, and decisions throughout the competition. Skip if `.backlog/` already exists.
+
+After initialization, create a milestone for the competition deadline if known:
+
+```bash
+backlog milestone create "Competition Deadline" --due {DEADLINE_DATE}
+```
+
 ## Troubleshooting
 
 ### Common Issues
@@ -125,3 +139,4 @@ gcloud storage ls gs://{BUCKET_NAME}/data/input/{COMPETITION_NAME}/
 | `docker/cloudbuild.yaml`                         | Cloud Build configuration   |
 | `src/kaggle_ops/vertex.py`                       | Vertex AI job submission    |
 | `src/kaggle_ops/scripts/download_competition.py` | GCS download script         |
+| `.backlog/`                                      | Project management (Backlog) |
