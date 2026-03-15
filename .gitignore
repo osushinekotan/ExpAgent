@@ -159,3 +159,5 @@ models/*/artifacts/*
 .terraform/
 *.tfvars
 *.tfvars.json
+
+wandb/*
